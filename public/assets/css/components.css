@@ -1,0 +1,30 @@
+/* Components spécifiques qui pourront être étoffés plus tard */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-pending { background: var(--or-clair); color: #795548; border: 1px solid var(--or-fonce); }
+.badge-confirmed { background: var(--vert-clair); color: #2E7D32; border: 1px solid var(--vert); }
+.badge-completed { background: var(--bleu-clair); color: var(--bleu); border: 1px solid var(--bleu); }
+.badge-cancelled { background: var(--rouge-clair); color: #C62828; border: 1px solid var(--rouge); }
+
+.card {
+    background: var(--blanc);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gris-200);
+    padding: 20px;
+    transition: all 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    border-color: var(--vert);
+}
