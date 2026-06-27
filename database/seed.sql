@@ -3,13 +3,10 @@
 -- ========================================================
 
 -- Insérer des utilisateurs de test
--- Les mots de passe sont stockés en hash PHP pour correspondre à password_verify()
 INSERT INTO utilisateurs (nom, prenom, email, telephone, mot_de_passe, role, est_conducteur_valide, statut) VALUES
-('Diallo', 'Amadou', 'amadou@test.com', '+221772345678', '$2y$10$FBMaCC6G2v4S3P12pGNbiOL/qk7zNbNRjDFE43tEVvqzecUqfJ4mK', 'conducteur', TRUE, 'actif'),
-('Ndiaye', 'Marie', 'passager@test.com', '+221783456789', '$2y$10$fEYKGH5GQfB5h7Fv7Ncn4OiQ2AZDUmW3AvMqW6F/MZyf3rnVGbgwO', 'passager', FALSE, 'actif'),
-('Seck', 'Moussa', 'moussadiop@gmail.com', '+221794567890', '$2y$10$fEYKGH5GQfB5h7Fv7Ncn4OiQ2AZDUmW3AvMqW6F/MZyf3rnVGbgwO', 'passager', FALSE, 'actif'),
-('Dione', 'Babacar', 'babacarrened@gmail.com', '+221776543210', '$2y$10$NdKu.AmqRM8FG9yHiXv7L.8W6c/j7tpaLwQKWQAcGhw96VRfPGzGa', 'passager', FALSE, 'actif'),
-('Admin', 'Super', 'admin@test.com', '+221700000000', '$2y$10$QKMeZLZ/QNoRwlIdkU08QeLPBp/albQT5nSv.ZDJxdcGX2jFur3N2', 'admin', FALSE, 'actif');
+('Diallo', 'Amadou', 'amadou.diallo@example.com', '+221772345678', 'conducteur123', 'conducteur', TRUE, 'actif'),
+('Ndiaye', 'Aïssatou', 'aissatou.ndiaye@example.com', '+221783456789', 'passager123', 'passager', FALSE, 'actif'),
+('Seck', 'Moussa', 'moussa.seck@example.com', '+221794567890', 'passager123', 'passager', FALSE, 'actif');
 
 -- Insérer des véhicules
 INSERT INTO vehicules (conducteur_id, marque, modele, couleur, immatriculation, nombre_places) VALUES
