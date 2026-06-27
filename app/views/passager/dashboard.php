@@ -1,8 +1,13 @@
+<?php
+$userRole = $_SESSION['user_role'] ?? '';
+$isConducteurValide = !empty($_SESSION['est_conducteur_valide']);
+$reservations = $reservations ?? [];
+?>
 <div style="max-width: 1100px; margin: 40px auto; padding: 0 20px;">
     
     <div class="page-header">
 
-     <?php if($_SESSION['user_role'] !== 'conducteur' && !$_SESSION['est_conducteur_valide']): ?>
+     <?php if($userRole !== 'conducteur' && !$isConducteurValide): ?>
 <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mb-8 flex justify-between items-center">
     <div class="flex items-center gap-4">
         <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center">
@@ -112,7 +117,14 @@
                                 <span class="status-badge" style="background:var(--kd-bg); color:var(--text-muted); border:1px solid #E2E8F0;"><i data-lucide="flag" width="14" height="14"></i> Terminée</span>
                             <?php endif; ?>
                         </div>
-                        <a href="<?= BASE_URL ?>passager/reservation/<?= $res->id ?>" class="btn btn-outline" style="padding: 10px 16px; font-size: 13px;">Suivre le trajet</a>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+                            <a href="<?= BASE_URL ?>passager/reservation/<?= $res->id ?>" class="btn btn-outline" style="padding: 10px 16px; font-size: 13px;">Suivre le trajet</a>
+                            <?php if(in_array($res->statut, ['en_attente', 'confirmee'], true)): ?>
+                                <form action="<?= BASE_URL ?>passager/reservation/<?= $res->id ?>/annuler" method="POST" onsubmit="return confirm('Annuler cette réservation ?');">
+                                    <button type="submit" class="btn btn-outline" style="padding: 10px 16px; font-size: 13px; border-color:#fecaca; color:#b91c1c;">Annuler</button>
+                                </form>
+                            <?php endif; ?>
+                        </div>
                     </div>
 
                 </div>

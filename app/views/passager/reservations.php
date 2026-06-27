@@ -50,7 +50,14 @@
                                 <span class="status-badge" style="padding:8px 14px; background:#f8fafc; color:#475569; border:1px solid #e2e8f0;">Terminée</span>
                             <?php endif; ?>
                         </div>
-                        <a href="<?= BASE_URL ?>passager/reservation/<?= $res->id ?>" class="btn btn-primary" style="padding: 12px 18px;">Suivre le trajet</a>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+                            <a href="<?= BASE_URL ?>passager/reservation/<?= $res->id ?>" class="btn btn-primary" style="padding: 12px 18px;">Suivre le trajet</a>
+                            <?php if(in_array($res->statut, ['en_attente', 'confirmee'], true)): ?>
+                                <form action="<?= BASE_URL ?>passager/reservation/<?= $res->id ?>/annuler" method="POST" onsubmit="return confirm('Annuler cette réservation ?');">
+                                    <button type="submit" class="btn btn-outline" style="padding: 12px 18px; border-color:#fecaca; color:#b91c1c;">Annuler</button>
+                                </form>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
             <?php endforeach; ?>

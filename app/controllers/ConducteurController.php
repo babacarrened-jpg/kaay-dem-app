@@ -281,4 +281,14 @@ class ConducteurController extends Controller {
 
         $this->redirect('conducteur/trajets?error=annulation_impossible');
     }
+    public function mesPassagers() {
+        $passagers = $this->reservationModel->getPassagersByConducteur((int)$_SESSION['user_id']);
+
+        $data = [
+            'titre' => 'Mes passagers',
+            'passagers' => $passagers
+        ];
+
+        $this->render('conducteur/mes_passagers', $data);
+    }
 }

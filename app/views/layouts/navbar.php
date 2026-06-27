@@ -63,6 +63,17 @@
                     </svg>
                 </a>
 
+                <!-- Lien Mes passagers (conducteur uniquement) -->
+                <?php if (in_array('conducteur', $roles, true)) : ?>
+                    <a href="<?= BASE_URL ?>conducteur/passagers"
+                        class="p-2.5 rounded-xl text-slate-500 hover:text-brand-600 hover:bg-brand-50 transition-all duration-200"
+                        title="Mes passagers">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                        </svg>
+                    </a>
+                <?php endif; ?>
+
                 <!-- Avatar pill -->
                 <a href="<?= BASE_URL ?>profil"
                     class="flex items-center gap-3 bg-white/80 border border-slate-200/80 py-1.5 pl-1.5 pr-4 rounded-2xl hover:border-brand-300 hover:bg-white hover:shadow-lg hover:shadow-brand-600/10 hover:-translate-y-0.5 transition-all duration-300 group">
@@ -182,6 +193,19 @@
                     Mon Dashboard
                 </a>
 
+                <!-- Lien Mes passagers (conducteur uniquement) -->
+                <?php if ($_SESSION['user_role'] == 'conducteur') : ?>
+                    <a href="<?= BASE_URL ?>conducteur/passagers"
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-brand-50 transition-all duration-200 group">
+                        <div class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-brand-100 flex items-center justify-center transition-colors flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-500 group-hover:text-brand-600">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                            </svg>
+                        </div>
+                        Mes passagers
+                    </a>
+                <?php endif; ?>
+
                 <a href="<?= BASE_URL ?>auth/deconnexion"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-all duration-200 group mt-1">
                     <div class="w-9 h-9 rounded-xl bg-red-50 group-hover:bg-red-100 flex items-center justify-center transition-colors flex-shrink-0">
@@ -209,7 +233,7 @@
 
             <?php endif; ?>
 
-            <!-- Padding bas pour éviter que le contenu colle -->
+            <!-- Padding bas -->
             <div class="h-2"></div>
         </div>
     </div>
