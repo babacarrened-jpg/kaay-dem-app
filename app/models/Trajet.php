@@ -12,23 +12,12 @@ class Trajet {
      * Rechercher des trajets selon des critères
      */
     public function search($depart, $arrivee, $date, $prix_min = null, $prix_max = null, $places_min = null, $places_max = null, $page = 1, $limit = 10) {
-        // Requête de base pour récupérer les trajets planifiés avec places dispo
         $whereSql = "FROM trajets t
                 JOIN utilisateurs u ON t.conducteur_id = u.id
                 JOIN vehicules v ON t.vehicule_id = v.id
                 WHERE t.statut = 'planifie' AND t.places_disponibles > 0";
-        
-        $params = [];
 
-        if(!empty($depart)) {
-            $whereSql .= " AND t.ville_depart LIKE :depart";
-            $params[':depart'] = "%$depart%";
-        }
-        
-        if(!empty($arrivee)) {
-            $whereSql .= " AND t.ville_arrivee LIKE :arrivee";
-            $params[':arrivee'] = "%$arrivee%";
-        }
+        $params = [];
 
         if(!empty($date)) {
             $whereSql .= " AND t.date_trajet = :date";
@@ -59,27 +48,35 @@ class Trajet {
         $limit = max(1, min(50, (int)$limit));
         $offset = ($page - 1) * $limit;
 
-        $countSql = "SELECT COUNT(*) as total " . $whereSql;
-        $resultSql = "SELECT t.*, u.nom as conducteur_nom, u.prenom as conducteur_prenom, u.photo_profil, v.marque, v.modele " . $whereSql . " ORDER BY t.date_trajet ASC, t.heure_depart ASC LIMIT :limit OFFSET :offset";
-
-        $this->db->query($countSql);
-        foreach($params as $param => $value) {
-            $this->db->bind($param, $value);
-        }
-        $totalRow = $this->db->single();
-        $total = $totalRow ? (int)$totalRow->total : 0;
+        $resultSql = "SELECT t.*, u.nom as conducteur_nom, u.prenom as conducteur_prenom, u.photo_profil, v.marque, v.modele " . $whereSql . " ORDER BY t.date_trajet ASC, t.heure_depart ASC";
 
         $this->db->query($resultSql);
         foreach($params as $param => $value) {
             $this->db->bind($param, $value);
         }
-        $this->db->bind(':limit', $limit);
-        $this->db->bind(':offset', $offset);
 
         $trajets = $this->db->resultSet();
 
+        $normalizedDepart = $this->normalizeText($depart);
+        $normalizedArrivee = $this->normalizeText($arrivee);
+
+        $filteredTrajets = array_values(array_filter($trajets, function($trajet) use ($normalizedDepart, $normalizedArrivee) {
+            if($normalizedDepart !== '' && !$this->matchesCity($trajet->ville_depart, $normalizedDepart)) {
+                return false;
+            }
+
+            if($normalizedArrivee !== '' && !$this->matchesCity($trajet->ville_arrivee, $normalizedArrivee)) {
+                return false;
+            }
+
+            return true;
+        }));
+
+        $total = count($filteredTrajets);
+        $paginatedTrajets = array_slice($filteredTrajets, $offset, $limit);
+
         return [
-            'trajets' => $trajets,
+            'trajets' => $paginatedTrajets,
             'pagination' => [
                 'currentPage' => $page,
                 'perPage' => $limit,
@@ -87,6 +84,27 @@ class Trajet {
                 'totalPages' => (int)ceil($total / $limit)
             ]
         ];
+    }
+
+    private function normalizeText($value) {
+        if($value === null) {
+            return '';
+        }
+
+        $value = mb_strtolower((string)$value, 'UTF-8');
+        $value = str_replace(['-', '_', ' '], '', $value);
+        $value = iconv('UTF-8', 'ASCII//TRANSLIT', $value) ?: $value;
+        $value = preg_replace('/[^a-z0-9]/', '', $value);
+
+        return $value;
+    }
+
+    private function matchesCity($storedValue, $searchValue) {
+        if($storedValue === null || $searchValue === '') {
+            return true;
+        }
+
+        return strpos($this->normalizeText($storedValue), $searchValue) !== false;
     }
 
     /**

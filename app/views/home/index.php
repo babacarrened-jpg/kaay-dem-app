@@ -277,3 +277,5 @@
         showMapError();
     }
 </script>
+
+<!-- Relecture et vérification du HTML/CSS par Khady -->
