@@ -61,7 +61,7 @@
         <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex justify-between items-start hover:-translate-y-1 hover:shadow-md transition-all duration-300">
             <div class="w-14 h-14 rounded-2xl bg-yellow-50 text-yellow-600 flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c-.317-.159-.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c-.317-.159-.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
                 </svg>
             </div>
             <div class="text-right">
@@ -82,6 +82,126 @@
             </div>
         </div>
     </section>
+
+    <!-- Carte des trajets actifs -->
+    <?php if(!empty($trajets_actifs)): ?>
+    <section class="mb-10">
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="px-8 py-6 flex justify-between items-center border-b border-slate-100">
+                <div>
+                    <h2 class="font-display text-xl font-bold text-slate-900">Trajets actifs en temps réel</h2>
+                    <p class="text-sm text-slate-500 mt-1"><?= count($trajets_actifs) ?> trajet<?= count($trajets_actifs) > 1 ? 's' : '' ?> en cours sur le corridor</p>
+                </div>
+                <span class="flex items-center gap-2 text-xs font-semibold text-green-600 bg-green-50 px-3 py-1.5 rounded-full">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    Live
+                </span>
+            </div>
+            <div id="admin-trajets-map" style="width:100%; height:480px;"></div>
+        </div>
+    </section>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+    const adminTrips = <?= json_encode(array_map(function($t) {
+        return [
+            'id'            => $t->id,
+            'depart'        => $t->point_depart ?: $t->ville_depart,
+            'arrivee'       => $t->point_arrivee ?: $t->ville_arrivee,
+            'ville_depart'  => $t->ville_depart,
+            'ville_arrivee' => $t->ville_arrivee,
+            'date'          => $t->date_trajet,
+            'heure'         => substr($t->heure_depart, 0, 5),
+            'prix'          => $t->prix_par_place,
+            'places'        => $t->places_disponibles,
+            'statut'        => $t->statut,
+        ];
+    }, $trajets_actifs), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>;
+
+    const adminColors = ['#38bdf8','#f97316','#22c55e','#a855f7','#fb7185','#facc15','#34d399'];
+
+    const getMarkerIcon = (color) => L.divIcon({
+        className: '',
+        html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2.5px solid white;box-shadow:0 0 8px ${color};"></div>`,
+        iconSize: [14, 14],
+        iconAnchor: [7, 7]
+    });
+
+    const geocode = async (q) => {
+        const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`, {
+            headers: { 'Accept': 'application/json' }
+        });
+        const d = await r.json();
+        if (!d.length) throw new Error('not found');
+        return { lat: parseFloat(d[0].lat), lon: parseFloat(d[0].lon) };
+    };
+
+    const fetchRoute = async (from, to) => {
+        const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${from.lon},${from.lat};${to.lon},${to.lat}?overview=full&geometries=geojson`);
+        const d = await r.json();
+        if (!d.routes?.length) throw new Error('no route');
+        return d.routes[0].geometry;
+    };
+
+    const initAdminMap = async () => {
+        if (!adminTrips.length || typeof L === 'undefined') return;
+
+        const map = L.map('admin-trajets-map', {
+            center: [14.715, -17.467],
+            zoom: 9,
+            zoomControl: true
+        });
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; CARTO &copy; OpenStreetMap',
+            maxZoom: 19
+        }).addTo(map);
+
+        const bounds = L.latLngBounds([]);
+
+        for (let i = 0; i < adminTrips.length; i++) {
+            const t = adminTrips[i];
+            const color = adminColors[i % adminColors.length];
+            try {
+                const from = await geocode(`${t.depart}, Sénégal`);
+                const to   = await geocode(`${t.arrivee}, Sénégal`);
+                const geom = await fetchRoute(from, to);
+
+                const route = L.geoJSON(geom, {
+                    style: { color, weight: 4, opacity: 0.85 }
+                }).addTo(map);
+                bounds.extend(route.getBounds());
+
+                L.marker([from.lat, from.lon], { icon: getMarkerIcon(color) })
+                    .bindPopup(`
+                        <div style="font-family:sans-serif;min-width:180px;">
+                            <div style="font-weight:700;margin-bottom:6px;">🚩 ${t.ville_depart} → ${t.ville_arrivee}</div>
+                            <div style="font-size:12px;color:#64748b;margin-bottom:2px;">📅 ${t.date} à ${t.heure}</div>
+                            <div style="font-size:12px;color:#64748b;margin-bottom:2px;">💺 ${t.places} place(s) disponible(s)</div>
+                            <div style="font-size:12px;color:#64748b;margin-bottom:6px;">💰 ${t.prix} F/place</div>
+                            <span style="background:${t.statut==='en_cours'?'#dcfce7':'#dbeafe'};color:${t.statut==='en_cours'?'#16a34a':'#1d4ed8'};padding:2px 10px;border-radius:999px;font-size:11px;font-weight:700;">
+                                ${t.statut}
+                            </span>
+                        </div>
+                    `)
+                    .addTo(map);
+
+                L.marker([to.lat, to.lon], { icon: getMarkerIcon(color) })
+                    .bindPopup(`<strong>Arrivée :</strong> ${t.ville_arrivee}`)
+                    .addTo(map);
+
+            } catch(e) {
+                console.warn('Trajet ignoré:', t.ville_depart, '→', t.ville_arrivee, e);
+            }
+        }
+
+        if (bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40] });
+    };
+
+    document.addEventListener('DOMContentLoaded', initAdminMap);
+    </script>
+    <?php endif; ?>
 
     <!-- Contenu Principal -->
     <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
