@@ -15,6 +15,12 @@
         </a>
     </div>
 
+    <?php if (!empty($erreur)): ?>
+        <div class="alert alert-danger" style="margin-bottom: 24px; padding: 16px; border-radius: 12px; background:#FEE2E2; color:#991B1B;">
+            <?= htmlspecialchars($erreur) ?>
+        </div>
+    <?php endif; ?>
+
     <div class="glass-panel">
         <form action="<?= BASE_URL ?>conducteur/trajets/nouveau" method="POST">
             

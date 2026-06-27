@@ -119,6 +119,33 @@ class Trajet {
     }
 
     /**
+     * Créer un nouveau trajet publié par un conducteur
+     */
+    public function create(array $data): bool {
+        $this->db->query("INSERT INTO trajets
+            (conducteur_id, vehicule_id, ville_depart, point_depart, ville_arrivee, point_arrivee,
+             date_trajet, heure_depart, prix_par_place, places_disponibles, places_totales, description, statut)
+            VALUES
+            (:conducteur_id, :vehicule_id, :ville_depart, :point_depart, :ville_arrivee, :point_arrivee,
+             :date_trajet, :heure_depart, :prix_par_place, :places_disponibles, :places_totales, :description, 'planifie')");
+
+        $this->db->bind(':conducteur_id', $data['conducteur_id']);
+        $this->db->bind(':vehicule_id', $data['vehicule_id']);
+        $this->db->bind(':ville_depart', $data['ville_depart']);
+        $this->db->bind(':point_depart', $data['point_depart'] ?: null);
+        $this->db->bind(':ville_arrivee', $data['ville_arrivee']);
+        $this->db->bind(':point_arrivee', $data['point_arrivee'] ?: null);
+        $this->db->bind(':date_trajet', $data['date_trajet']);
+        $this->db->bind(':heure_depart', $data['heure_depart']);
+        $this->db->bind(':prix_par_place', $data['prix_par_place']);
+        $this->db->bind(':places_disponibles', $data['places_totales']);
+        $this->db->bind(':places_totales', $data['places_totales']);
+        $this->db->bind(':description', $data['description'] ?: null);
+
+        return $this->db->execute();
+    }
+
+    /**
      * Récupérer tous les trajets pour l'admin
      */
     public function getAll(array $filters = []) {

@@ -46,6 +46,8 @@ $router->get('/conducteur/dashboard', 'ConducteurController', 'dashboard');
 $router->get('/conducteur/trajets', 'ConducteurController', 'mesTrajets');
 $router->get('/conducteur/trajets/nouveau', 'ConducteurController', 'nouveauTrajetForm');
 $router->post('/conducteur/trajets/nouveau', 'ConducteurController', 'creerTrajet');
+$router->get('/conducteur/vehicule/nouveau', 'ConducteurController', 'nouveauVehiculeForm');
+$router->post('/conducteur/vehicule/nouveau', 'ConducteurController', 'creerVehicule');
 // Gestion des réservations pour conducteurs
 $router->get('/conducteur/reservations', 'ConducteurController', 'reservations');
 $router->post('/conducteur/reservation/{reservation_id}/accept', 'ConducteurController', 'acceptReservation');

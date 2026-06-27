@@ -4,6 +4,7 @@
 class ConducteurController extends Controller {
     private $trajetModel;
     private $reservationModel;
+    private $vehiculeModel;
 
     public function __construct() {
         if(!isset($_SESSION['user_id'])) {
@@ -18,6 +19,7 @@ class ConducteurController extends Controller {
 
         $this->trajetModel = $this->model('Trajet');
         $this->reservationModel = $this->model('Reservation');
+        $this->vehiculeModel = $this->model('Vehicule');
     }
 
     /**
@@ -127,8 +129,13 @@ class ConducteurController extends Controller {
 
     /**
      * Affiche le formulaire de création de trajet
+     * (redirige vers l'ajout de véhicule si le conducteur n'en a aucun)
      */
     public function nouveauTrajetForm() {
+        if(!$this->vehiculeModel->conducteurAUnVehicule((int)$_SESSION['user_id'])) {
+            $this->redirect('conducteur/vehicule/nouveau?retour=trajet');
+        }
+
         $data = [
             'titre' => 'Publier un trajet'
         ];
@@ -139,16 +146,120 @@ class ConducteurController extends Controller {
      * Traite la création d'un nouveau trajet
      */
     public function creerTrajet() {
-        if($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $postData = $this->getPostData();
+        if($_SERVER['REQUEST_METHOD'] != 'POST') {
+            $this->redirect('conducteur/trajets/nouveau');
+            return;
+        }
 
-            // Ici on devrait appeler le TrajetModel pour faire l'INSERT INTO trajets
-            // ...
-            // Pour l'exercice, on redirige avec succès
-            
+        $conducteurId = (int)$_SESSION['user_id'];
+
+        // Le conducteur doit avoir au moins un véhicule pour publier
+        $vehicule = $this->vehiculeModel->getPremierVehicule($conducteurId);
+        if(!$vehicule) {
+            $this->redirect('conducteur/vehicule/nouveau?retour=trajet');
+            return;
+        }
+
+        $postData = $this->getPostData();
+
+        // Validation simple des champs obligatoires
+        $errors = [];
+        if(empty($postData['ville_depart'])) { $errors[] = 'ville_depart'; }
+        if(empty($postData['ville_arrivee'])) { $errors[] = 'ville_arrivee'; }
+        if(empty($postData['date_trajet'])) { $errors[] = 'date_trajet'; }
+        if(empty($postData['heure_depart'])) { $errors[] = 'heure_depart'; }
+        if(empty($postData['places_totales']) || (int)$postData['places_totales'] < 1) { $errors[] = 'places_totales'; }
+        if(empty($postData['prix_par_place']) || (float)$postData['prix_par_place'] <= 0) { $errors[] = 'prix_par_place'; }
+
+        if(!empty($errors)) {
+            $data = [
+                'titre' => 'Publier un trajet',
+                'erreur' => 'Veuillez remplir correctement tous les champs obligatoires.'
+            ];
+            $this->render('conducteur/nouveau_trajet', $data);
+            return;
+        }
+
+        $trajetData = [
+            'conducteur_id' => $conducteurId,
+            'vehicule_id' => $vehicule->id,
+            'ville_depart' => $postData['ville_depart'],
+            'point_depart' => $postData['point_depart'] ?? '',
+            'ville_arrivee' => $postData['ville_arrivee'],
+            'point_arrivee' => $postData['point_arrivee'] ?? '',
+            'date_trajet' => $postData['date_trajet'],
+            'heure_depart' => $postData['heure_depart'],
+            'prix_par_place' => (float)$postData['prix_par_place'],
+            'places_totales' => (int)$postData['places_totales'],
+            'description' => $postData['description'] ?? ''
+        ];
+
+        if($this->trajetModel->create($trajetData)) {
             $this->redirect('conducteur/dashboard?success=trajet_publie');
         } else {
-            $this->redirect('conducteur/trajets/nouveau');
+            $data = [
+                'titre' => 'Publier un trajet',
+                'erreur' => "Une erreur est survenue lors de la publication du trajet. Réessayez."
+            ];
+            $this->render('conducteur/nouveau_trajet', $data);
+        }
+    }
+
+    /**
+     * Affiche le formulaire d'ajout de véhicule
+     */
+    public function nouveauVehiculeForm() {
+        $data = [
+            'titre' => 'Ajouter mon véhicule',
+            'retour' => $_GET['retour'] ?? ''
+        ];
+        $this->render('conducteur/nouveau_vehicule', $data);
+    }
+
+    /**
+     * Traite l'ajout d'un véhicule
+     */
+    public function creerVehicule() {
+        if($_SERVER['REQUEST_METHOD'] != 'POST') {
+            $this->redirect('conducteur/dashboard');
+            return;
+        }
+
+        $postData = $this->getPostData();
+
+        $errors = [];
+        if(empty($postData['marque'])) { $errors[] = 'marque'; }
+        if(empty($postData['modele'])) { $errors[] = 'modele'; }
+        if(empty($postData['couleur'])) { $errors[] = 'couleur'; }
+        if(empty($postData['immatriculation'])) { $errors[] = 'immatriculation'; }
+        if(empty($postData['nombre_places']) || (int)$postData['nombre_places'] < 1) { $errors[] = 'nombre_places'; }
+
+        if(!empty($errors)) {
+            $data = [
+                'titre' => 'Ajouter mon véhicule',
+                'retour' => $_POST['retour'] ?? '',
+                'erreur' => 'Veuillez remplir correctement tous les champs.'
+            ];
+            $this->render('conducteur/nouveau_vehicule', $data);
+            return;
+        }
+
+        $ok = $this->vehiculeModel->ajouter((int)$_SESSION['user_id'], $postData);
+
+        if($ok) {
+            // Si l'utilisateur venait du formulaire de trajet, on l'y renvoie directement
+            if(($postData['retour'] ?? '') === 'trajet') {
+                $this->redirect('conducteur/trajets/nouveau');
+            } else {
+                $this->redirect('conducteur/dashboard?success=vehicule_ajoute');
+            }
+        } else {
+            $data = [
+                'titre' => 'Ajouter mon véhicule',
+                'retour' => $_POST['retour'] ?? '',
+                'erreur' => "Une erreur est survenue lors de l'ajout du véhicule. Réessayez."
+            ];
+            $this->render('conducteur/nouveau_vehicule', $data);
         }
     }
 }
