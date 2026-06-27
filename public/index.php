@@ -62,6 +62,10 @@ $router->get('/admin/trajets', 'AdminController', 'trajets');
 $router->post('/admin/validerConducteur/{id}', 'AdminController', 'validerConducteur');
 $router->post('/admin/refuserConducteur/{id}', 'AdminController', 'refuserConducteur');
 
+// Dans la section --- Passager ---
+$router->get('/passager/devenirConducteur', 'PassagerController', 'devenirConducteurForm');
+$router->post('/passager/devenirConducteur', 'PassagerController', 'devenirConducteur');
+
 
 // ============================================
 // EXÉCUTION DU ROUTAGE

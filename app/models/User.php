@@ -181,4 +181,23 @@ class User implements RepositoryInterface {
         $this->db->bind(':id', $id);
         return $this->db->execute();
     }
+
+
+    public function demanderConducteur(int $userId, string $permisRecto, string $permisVerso): bool {
+    // Vérifier si une demande en attente existe déjà
+    $this->db->query('SELECT id FROM demandes_conducteur 
+                      WHERE utilisateur_id = :user_id AND statut = "en_attente"');
+    $this->db->bind(':user_id', $userId);
+    $this->db->single();
+    if($this->db->rowCount() > 0) return false;
+
+    $this->db->query('INSERT INTO demandes_conducteur 
+                      (utilisateur_id, permis_recto, permis_verso, statut, date_demande) 
+                      VALUES (:user_id, :recto, :verso, "en_attente", NOW())');
+    $this->db->bind(':user_id', $userId);
+    $this->db->bind(':recto', $permisRecto);
+    $this->db->bind(':verso', $permisVerso);
+    return $this->db->execute();
+}
+    
 }

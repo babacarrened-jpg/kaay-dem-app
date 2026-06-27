@@ -1,6 +1,35 @@
 <div style="max-width: 1100px; margin: 40px auto; padding: 0 20px;">
     
     <div class="page-header">
+
+     <?php if($_SESSION['user_role'] !== 'conducteur' && !$_SESSION['est_conducteur_valide']): ?>
+<div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mb-8 flex justify-between items-center">
+    <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+            </svg>
+        </div>
+        <div>
+            <p class="font-semibold text-slate-900">Vous voulez conduire ?</p>
+            <p class="text-sm text-slate-500">Soumettez votre permis, l'admin validera votre profil.</p>
+        </div>
+    </div>
+    <a href="<?= BASE_URL ?>passager/devenirConducteur" class="px-5 py-2.5 rounded-2xl bg-brand-600 text-white font-semibold text-sm hover:bg-brand-700 transition-colors shadow-sm whitespace-nowrap">
+        Devenir conducteur
+    </a>
+</div>
+<?php endif; ?>
+
+<?php if(isset($_GET['success']) && $_GET['success'] === 'demande_envoyee'): ?>
+    <div class="bg-green-50 text-green-700 p-4 rounded-xl mb-6 flex items-center gap-3 border border-green-200">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 shrink-0">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span class="text-sm font-semibold">Demande envoyée ! L'administrateur va traiter votre dossier.</span>
+    </div>
+<?php endif; ?>
+
         <div class="page-title-group">
             <div class="page-title-icon">
                 <i data-lucide="ticket" width="28" height="28"></i>
@@ -95,3 +124,5 @@
 <style>
 .glass-panel:hover .card-hover-bar { transform: scaleY(1); }
 </style>
+
+
