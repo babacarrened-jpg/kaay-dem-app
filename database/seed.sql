@@ -1,7 +1,9 @@
 -- ========================================================
 -- DONNÉES DE TEST - KAAY DEM !
 -- ========================================================
-//p
+/*conducteur : conducteur123
+    passager : passager123             ------------moguini-------
+    admind : admin123@*/
 
 -- Insérer des utilisateurs de test
 INSERT INTO utilisateurs (nom, prenom, email, telephone, mot_de_passe, role, est_conducteur_valide, statut) VALUES
@@ -9,7 +11,8 @@ INSERT INTO utilisateurs (nom, prenom, email, telephone, mot_de_passe, role, est
 ('Diop', 'Saliou', 'saliou.diop@example.com', '+221774567890', '$2y$10$R9q6TSKb4FuDJoF2y2jquewPKdtOg/gO2KHJRnmC3Vyoi..q0.Gea', 'conducteur', TRUE, 'actif'),
 ('Fall', 'Khady', 'khady.fall@example.com', '+221775678901', '$2y$10$R9q6TSKb4FuDJoF2y2jquewPKdtOg/gO2KHJRnmC3Vyoi..q0.Gea', 'conducteur', TRUE, 'actif'),
 ('Ndiaye', 'Aïssatou', 'aissatou.ndiaye@example.com', '+221783456789', '$2y$10$JriPwa58rpicSm1EU7l59.HwUjSSWEFWOA/YbTfQjmYrqeMXgc6tG', 'passager', FALSE, 'actif'),
-('Seck', 'Moussa', 'moussa.seck@example.com', '+221794567890', '$2y$10$JriPwa58rpicSm1EU7l59.HwUjSSWEFWOA/YbTfQjmYrqeMXgc6tG', 'passager', FALSE, 'actif');
+('Seck', 'Moussa', 'moussa.seck@example.com', '+221794567890', '$2y$10$JriPwa58rpicSm1EU7l59.HwUjSSWEFWOA/YbTfQjmYrqeMXgc6tG', 'passager', FALSE, 'actif'),
+('Admin', 'Super', 'admin@example.com', '+221700000000', '$2y$10$U4eH5fZG59Qh4sX8CQ2pJ.Z6y0A9o1f8YBrQ6s5Lx5fKzJj9j7Qm2', 'admin', FALSE, 'actif');
 
 -- Insérer des véhicules
 INSERT INTO vehicules (conducteur_id, marque, modele, couleur, immatriculation, nombre_places) VALUES
