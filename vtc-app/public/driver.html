@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VTC Chauffeur</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js" integrity="sha512-dKumPvfS4/0eE3ZVq0ZtTWGxkaSmdIBleOYh9ULs1Ff+lvnQPkzCwwa8z/d9jMJc06W/w5HeFS4Jz+P9kXfRlQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.18.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.18.0/mapbox-gl.css" rel="stylesheet" />
+  <style>
+    body { margin:0; font-family: Inter, system-ui, sans-serif; background:#f8fafc; }
+    .layout { display:grid; grid-template-columns: 1fr 420px; min-height:100vh; }
+    #map { height:100vh; width:100%; }
+    .sidebar { padding:24px; background:#ffffff; border-left:1px solid #e5e7eb; display:flex; flex-direction:column; gap:20px; }
+    .card { background:#f8fafc; padding:18px; border-radius:20px; box-shadow:0 10px 30px rgba(15,23,42,.05); }
+    button, input { width:100%; border:1px solid #cbd5e1; border-radius:14px; padding:14px 16px; font-size:15px; }
+    button { background:#14b8a6; color:#fff; font-weight:700; border:none; cursor:pointer; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+    .status-chip { display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:999px; background:#d1fae5; color:#047857; font-weight:700; }
+    .ride-card { display:grid; gap:10px; }
+    .detail-row { display:flex; justify-content:space-between; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <div id="map"></div>
+    <div class="sidebar">
+      <div class="card">
+        <h2>Chauffeur</h2>
+        <p><strong>Nom :</strong> Amadou Diallo</p>
+        <p><strong>Véhicule :</strong> Toyota Corolla</p>
+        <p><strong>Immatriculation :</strong> SN-001-AAA</p>
+        <button id="go-online">Passer en ligne</button>
+      </div>
+
+      <div id="status-card" class="card" style="display:none;">
+        <h3>Statut</h3>
+        <div class="status-chip" id="driver-status">Hors ligne</div>
+      </div>
+
+      <div id="ride-card" class="card" style="display:none;">
+        <h3>Course reçue</h3>
+        <div class="ride-card">
+          <div class="detail-row"><span>Passager</span><strong id="ride-passenger">—</strong></div>
+          <div class="detail-row"><span>Prise en charge</span><strong id="ride-pickup">—</strong></div>
+          <div class="detail-row"><span>Destination</span><strong id="ride-dropoff">—</strong></div>
+          <div class="detail-row"><span>Distance</span><strong id="ride-distance">—</strong></div>
+          <div class="detail-row"><span>Durée</span><strong id="ride-duration">—</strong></div>
+          <button id="accept-ride">Accepter la course</button>
+          <button id="start-sending" disabled>Commencer à envoyer la position</button>
+          <button id="stop-sending" disabled>Arrêter l'envoi</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    mapboxgl.accessToken = 'YOUR_MAPBOX_ACCESS_TOKEN';
+    const socket = io('http://localhost:3000');
+    const driverId = 'driver1';
+    let map, currentMarker, rideRequest = null, intervalId = null;
+
+    const goOnlineButton = document.getElementById('go-online');
+    const statusCard = document.getElementById('status-card');
+    const driverStatus = document.getElementById('driver-status');
+    const rideCard = document.getElementById('ride-card');
+    const ridePassenger = document.getElementById('ride-passenger');
+    const ridePickup = document.getElementById('ride-pickup');
+    const rideDropoff = document.getElementById('ride-dropoff');
+    const rideDistance = document.getElementById('ride-distance');
+    const rideDuration = document.getElementById('ride-duration');
+    const acceptRideButton = document.getElementById('accept-ride');
+    const startSendingButton = document.getElementById('start-sending');
+    const stopSendingButton = document.getElementById('stop-sending');
+
+    const driverPosition = { lat: 14.7335, lng: -17.4680 };
+
+    const createMap = () => {
+      map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [driverPosition.lng, driverPosition.lat],
+        zoom: 12
+      });
+
+      map.on('load', () => {
+        currentMarker = new mapboxgl.Marker({ color: '#ef4444', draggable: true })
+          .setLngLat([driverPosition.lng, driverPosition.lat])
+          .addTo(map)
+          .on('dragend', () => {
+            const lngLat = currentMarker.getLngLat();
+            driverPosition.lat = lngLat.lat;
+            driverPosition.lng = lngLat.lng;
+          });
+      });
+
+      map.on('click', (event) => {
+        driverPosition.lat = event.lngLat.lat;
+        driverPosition.lng = event.lngLat.lng;
+        currentMarker.setLngLat(event.lngLat);
+      });
+    };
+
+    const joinDriverRoom = () => {
+      socket.emit('register', { type: 'driver', userId: driverId });
+      statusCard.style.display = 'block';
+      driverStatus.textContent = 'En ligne';
+      goOnlineButton.disabled = true;
+    };
+
+    const emitPosition = () => {
+      socket.emit('driver:position', {
+        driverId,
+        lat: driverPosition.lat,
+        lng: driverPosition.lng,
+        speed: Math.random() * 45 + 10,
+        heading: 0,
+        timestamp: new Date().toISOString()
+      });
+    };
+
+    const startSending = () => {
+      emitPosition();
+      intervalId = setInterval(emitPosition, 2000);
+      startSendingButton.disabled = true;
+      stopSendingButton.disabled = false;
+    };
+
+    const stopSending = () => {
+      clearInterval(intervalId);
+      intervalId = null;
+      startSendingButton.disabled = false;
+      stopSendingButton.disabled = true;
+    };
+
+    acceptRideButton.addEventListener('click', () => {
+      if (!rideRequest) return;
+      socket.emit('ride:accept', { rideId: rideRequest.rideId, driverId });
+    });
+
+    startSendingButton.addEventListener('click', () => {
+      startSending();
+      driverStatus.textContent = 'Course en cours';
+    });
+
+    stopSendingButton.addEventListener('click', () => {
+      stopSending();
+      driverStatus.textContent = 'En ligne';
+    });
+
+    goOnlineButton.addEventListener('click', () => {
+      joinDriverRoom();
+    });
+
+    socket.on('connect', () => {
+      console.log('connecté au serveur');
+    });
+
+    socket.on('ride:request', (payload) => {
+      rideRequest = payload;
+      rideCard.style.display = 'block';
+      ridePassenger.textContent = payload.passengerName || 'Passager';
+      ridePickup.textContent = `${payload.pickup.lat.toFixed(5)}, ${payload.pickup.lng.toFixed(5)}`;
+      rideDropoff.textContent = `${payload.dropoff.lat.toFixed(5)}, ${payload.dropoff.lng.toFixed(5)}`;
+      rideDistance.textContent = `${(payload.distance / 1000).toFixed(1)} km`;
+      rideDuration.textContent = `${Math.round(payload.duration / 60)} min`;
+      startSendingButton.disabled = false;
+    });
+
+    socket.on('ride:accepted', (ride) => {
+      if (!rideRequest || rideRequest.rideId !== ride.id) return;
+      driverStatus.textContent = 'Course acceptée';
+      acceptRideButton.disabled = true;
+      startSendingButton.disabled = false;
+    });
+
+    socket.on('ride:statusUpdate', (payload) => {
+      if (!rideRequest || payload.rideId !== rideRequest.rideId) return;
+      if (payload.status === 'ride_started') {
+        driverStatus.textContent = 'Course commencée';
+      } else if (payload.status === 'ride_ended') {
+        driverStatus.textContent = 'Course terminée';
+        stopSending();
+      }
+    });
+
+    createMap();
+  </script>
+</body>
+</html>

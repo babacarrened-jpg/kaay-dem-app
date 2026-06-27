@@ -3,6 +3,7 @@
 
 class AdminController extends Controller {
     private $userModel;
+    private $trajetModel;
     
     public function __construct() {
         if(!isset($_SESSION['user_id'])) {
@@ -10,11 +11,13 @@ class AdminController extends Controller {
         }
 
         // Sécurité : Seul l'admin peut accéder à ce contrôleur
-        if($_SESSION['user_role'] != 'admin') {
+        $roles = $_SESSION['user_roles'] ?? [$_SESSION['user_role'] ?? ''];
+        if(!in_array('admin', $roles, true)) {
             die("Accès non autorisé. Vous devez être administrateur.");
         }
 
         $this->userModel = $this->model('User');
+        $this->trajetModel = $this->model('Trajet');
     }
 
     /**
@@ -22,18 +25,40 @@ class AdminController extends Controller {
      */
     public function dashboard() {
         $demandes = $this->userModel->getPendingConducteurRequests();
+        $allTrajets = $this->trajetModel->getAll();
 
         $data = [
             'titre' => 'Administration - Kaay Dem !',
             'stats' => [
                 'utilisateurs' => count($this->userModel->findAll()),
-                'trajets_actifs' => 0,
+                'trajets_actifs' => count($allTrajets),
                 'signalements' => 0
             ],
             'demandes_conducteur' => $demandes
         ];
 
         $this->render('admin/dashboard', $data);
+    }
+
+    public function trajets() {
+        $filters = [
+            'statut' => $_GET['statut'] ?? '',
+            'conducteur_id' => isset($_GET['conducteur_id']) && is_numeric($_GET['conducteur_id']) ? (int)$_GET['conducteur_id'] : '',
+            'ville_depart' => trim($_GET['ville_depart'] ?? ''),
+            'ville_arrivee' => trim($_GET['ville_arrivee'] ?? '')
+        ];
+
+        $conducteurs = $this->userModel->getConducteurs();
+        $trajets = $this->trajetModel->getAll($filters);
+
+        $data = [
+            'titre' => 'Tous les trajets',
+            'trajets' => $trajets,
+            'conducteurs' => $conducteurs,
+            'filters' => $filters
+        ];
+
+        $this->render('admin/trajets', $data);
     }
 
     /**

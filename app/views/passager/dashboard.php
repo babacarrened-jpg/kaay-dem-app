@@ -11,7 +11,7 @@
             </div>
         </div>
         <a href="<?= BASE_URL ?>trajets/recherche" class="btn btn-primary">
-            <i data-lucide="search"></i> Nouveau trajet
+            <i data-lucide="search"></i> Rechercher un trajet
         </a>
     </div>
 
@@ -34,7 +34,8 @@
                 <i data-lucide="ticket" width="40" height="40"></i>
             </div>
             <h3 style="font-size: 24px; margin-bottom: 8px;">Aucune réservation</h3>
-            <p style="color: var(--text-muted); margin-bottom: 24px;">Vous n'avez pas encore réservé de trajet.</p>
+            <p style="color: var(--text-muted); margin-bottom: 16px;">Vous n'avez pas encore réservé de trajet.</p>
+            <p style="color: var(--text-muted); margin-bottom: 24px; font-weight:600;">Commencez par chercher un trajet et réservez votre ticket de transport en quelques clics.</p>
             <a href="<?= BASE_URL ?>trajets/recherche" class="btn btn-outline">Rechercher maintenant</a>
         </div>
     <?php else: ?>
@@ -70,16 +71,19 @@
                         </div>
                     </div>
 
-                    <div style="flex: 1; text-align: right;">
-                        <?php if($res->statut == 'en_attente'): ?>
-                            <span class="status-badge status-pending"><i data-lucide="loader" width="14" height="14"></i> En attente</span>
-                        <?php elseif($res->statut == 'confirmee'): ?>
-                            <span class="status-badge status-success"><i data-lucide="check" width="14" height="14"></i> Confirmée</span>
-                        <?php elseif($res->statut == 'annulee'): ?>
-                            <span class="status-badge status-danger"><i data-lucide="x" width="14" height="14"></i> Annulée</span>
-                        <?php elseif($res->statut == 'terminee'): ?>
-                            <span class="status-badge" style="background:var(--kd-bg); color:var(--text-muted); border:1px solid #E2E8F0;"><i data-lucide="flag" width="14" height="14"></i> Terminée</span>
-                        <?php endif; ?>
+                    <div style="flex: 1; display:flex; flex-direction:column; align-items:flex-end; justify-content:space-between; gap:12px; text-align:right;">
+                        <div>
+                            <?php if($res->statut == 'en_attente'): ?>
+                                <span class="status-badge status-pending"><i data-lucide="loader" width="14" height="14"></i> En attente</span>
+                            <?php elseif($res->statut == 'confirmee'): ?>
+                                <span class="status-badge status-success"><i data-lucide="check" width="14" height="14"></i> Confirmée</span>
+                            <?php elseif($res->statut == 'annulee'): ?>
+                                <span class="status-badge status-danger"><i data-lucide="x" width="14" height="14"></i> Annulée</span>
+                            <?php elseif($res->statut == 'terminee'): ?>
+                                <span class="status-badge" style="background:var(--kd-bg); color:var(--text-muted); border:1px solid #E2E8F0;"><i data-lucide="flag" width="14" height="14"></i> Terminée</span>
+                            <?php endif; ?>
+                        </div>
+                        <a href="<?= BASE_URL ?>passager/reservation/<?= $res->id ?>" class="btn btn-outline" style="padding: 10px 16px; font-size: 13px;">Suivre le trajet</a>
                     </div>
 
                 </div>

@@ -37,19 +37,26 @@ $router->get('/trajets/detail/{id}', 'TrajetController', 'detail');
 // --- Passager ---
 $router->get('/passager/dashboard', 'PassagerController', 'dashboard');
 $router->get('/passager/reservations', 'PassagerController', 'reservations');
-$router->post('/passager/reserver/{id}', 'PassagerController', 'reserverTrajet');
+$router->get('/passager/reservation/{id}', 'PassagerController', 'reservation');
+$router->get('/passager/reserver/{trajet_id}', 'PassagerController', 'reserverTrajet');
+$router->post('/passager/reserver/{trajet_id}', 'PassagerController', 'reserverTrajet');
 
 // --- Conducteur ---
 $router->get('/conducteur/dashboard', 'ConducteurController', 'dashboard');
 $router->get('/conducteur/trajets', 'ConducteurController', 'mesTrajets');
 $router->get('/conducteur/trajets/nouveau', 'ConducteurController', 'nouveauTrajetForm');
 $router->post('/conducteur/trajets/nouveau', 'ConducteurController', 'creerTrajet');
+// Gestion des réservations pour conducteurs
+$router->get('/conducteur/reservations', 'ConducteurController', 'reservations');
+$router->post('/conducteur/reservation/{reservation_id}/accept', 'ConducteurController', 'acceptReservation');
+$router->post('/conducteur/reservation/{reservation_id}/reject', 'ConducteurController', 'rejectReservation');
 
 // --- Profil ---
 $router->get('/profil', 'ProfilController', 'index');
 
 // --- Admin ---
 $router->get('/admin/dashboard', 'AdminController', 'dashboard');
+$router->get('/admin/trajets', 'AdminController', 'trajets');
 $router->post('/admin/validerConducteur/{id}', 'AdminController', 'validerConducteur');
 $router->post('/admin/refuserConducteur/{id}', 'AdminController', 'refuserConducteur');
 

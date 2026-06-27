@@ -19,7 +19,7 @@ class PassagerController extends Controller {
      * Affiche le dashboard du passager
      */
     public function dashboard() {
-        // Récupérer les réservations
+        // Récupérer les réservations récentes du passager
         $reservations = $this->reservationModel->getByPassager($_SESSION['user_id']);
 
         $data = [
@@ -31,10 +31,70 @@ class PassagerController extends Controller {
     }
 
     /**
+     * Liste toutes les réservations du passager
+     */
+    public function reservations() {
+        $reservations = $this->reservationModel->getByPassager($_SESSION['user_id']);
+
+        $data = [
+            'titre' => 'Mes réservations',
+            'reservations' => $reservations
+        ];
+
+        $this->render('passager/reservations', $data);
+    }
+
+    /**
+     * Affiche les détails et le suivi d'une réservation
+     */
+    public function reservation($id) {
+        $reservation = $this->reservationModel->getDetailById((int)$id, $_SESSION['user_id']);
+
+        if (!$reservation) {
+            die("Réservation introuvable.");
+        }
+
+        $statusMessage = '';
+        $alertType = 'info';
+
+        switch ($reservation->statut) {
+            case 'confirmee':
+                $statusMessage = 'Votre réservation est confirmée. Préparez-vous à embarquer !';
+                $alertType = 'success';
+                break;
+            case 'en_attente':
+                $statusMessage = 'Votre réservation est en attente de confirmation du conducteur.';
+                $alertType = 'warning';
+                break;
+            case 'termine':
+                $statusMessage = 'Ce trajet est terminé. Merci d’avoir voyagé avec nous.';
+                $alertType = 'secondary';
+                break;
+            case 'annulee':
+                $statusMessage = 'Cette réservation a été annulée. Contactez le support pour plus d’informations.';
+                $alertType = 'danger';
+                break;
+            default:
+                $statusMessage = 'Statut de la réservation : ' . ucfirst(str_replace('_', ' ', $reservation->statut));
+                break;
+        }
+
+        $data = [
+            'titre' => 'Suivi de réservation',
+            'reservation' => $reservation,
+            'statusMessage' => $statusMessage,
+            'alertType' => $alertType
+        ];
+
+        $this->render('passager/reservation', $data);
+    }
+
+    /**
      * Traite une demande de réservation
      */
-    public function reserverTrajet($trajet_id) {
-        if($_SERVER['REQUEST_METHOD'] == 'POST') {
+    public function reserverTrajet($trajet_id = null) {
+        if($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'GET') {
+            $trajet_id = $trajet_id ?? ($_POST['trajet_id'] ?? $_GET['trajet_id'] ?? null);
             
             // Récupérer infos du trajet
             $trajet = $this->trajetModel->getById($trajet_id);
@@ -67,4 +127,5 @@ class PassagerController extends Controller {
             $this->redirect('trajets/detail/' . $trajet_id);
         }
     }
+
 }

@@ -36,15 +36,22 @@ class Router {
      * Démarre le routage en analysant l'URL actuelle
      */
     public function dispatch($uri, $method) {
-        // Nettoyer l'URI (supprimer les query strings)
-        $uri = parse_url($uri, PHP_URL_PATH);
+        // Si Apache redirige via index.php?url=..., privilégier le paramètre 'url'
+        if (!empty($_GET['url'])) {
+            $uri = '/' . trim($_GET['url'], '/');
+        } else {
+            // Nettoyer l'URI (supprimer les query strings)
+            $uri = parse_url($uri, PHP_URL_PATH);
+        }
         
         // Retirer le dossier de base pour la compatibilité Windows/XAMPP
         $scriptName = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
         if ($scriptName !== '/' && strpos($uri, $scriptName) === 0) {
             $uri = substr($uri, strlen($scriptName));
         }
-        $uri = empty($uri) ? '/' : $uri;
+
+        $uri = '/' . trim($uri, '/');
+        $uri = $uri === '/' ? '/' : $uri;
 
         foreach ($this->routes as $route) {
             if ($route['method'] === $method && preg_match($route['pattern'], $uri, $matches)) {
@@ -79,7 +86,12 @@ class Router {
      */
     protected function abort($code = 404) {
         http_response_code($code);
-        require_once "../app/views/errors/{$code}.php";
+        $viewFile = "../app/views/errors/{$code}.php";
+        if (file_exists($viewFile)) {
+            require_once $viewFile;
+        } else {
+            echo "<h1>{$code}</h1><p>La page demandée est introuvable.</p>";
+        }
         exit;
     }
 }

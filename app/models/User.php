@@ -150,6 +150,11 @@ class User implements RepositoryInterface {
         return $this->db->resultSet();
     }
 
+    public function getConducteurs(): array {
+        $this->db->query("SELECT id, nom, prenom FROM utilisateurs WHERE role = 'conducteur' ORDER BY nom ASC, prenom ASC");
+        return $this->db->resultSet();
+    }
+
     public function save(array $data): bool {
         if (!empty($data['id'])) {
             $this->db->query('UPDATE utilisateurs SET nom = :nom, prenom = :prenom, email = :email, telephone = :telephone WHERE id = :id');

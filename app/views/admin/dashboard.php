@@ -41,6 +41,12 @@
         </div>
     <?php endif; ?>
 
+    <div class="mb-10 text-right">
+        <a href="<?= BASE_URL ?>admin/trajets" class="inline-flex items-center gap-2 rounded-2xl bg-brand-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 transition-colors">
+            Voir tous les trajets
+        </a>
+    </div>
+
     <!-- KPIs -->
     <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex justify-between items-start hover:-translate-y-1 hover:shadow-md transition-all duration-300">

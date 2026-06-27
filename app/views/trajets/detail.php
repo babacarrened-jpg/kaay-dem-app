@@ -18,6 +18,15 @@
                 <?= htmlspecialchars($trajet->ville_arrivee) ?>
             </h1>
 
+            <?php if(!empty($message)): ?>
+                <div style="margin-bottom: 24px; padding: 18px 22px; border-radius: 20px; border: 1px solid <?= $alertType === 'danger' ? '#fecaca' : ($alertType === 'warning' ? '#fde68a' : '#d1fae5') ?>; background: <?= $alertType === 'danger' ? 'rgba(254, 202, 202, 0.2)' : ($alertType === 'warning' ? 'rgba(253, 230, 138, 0.2)' : 'rgba(220, 252, 231, 0.2)') ?>; color: <?= $alertType === 'danger' ? '#991b1b' : ($alertType === 'warning' ? '#92400e' : '#166534') ?>;">
+                    <div style="display:flex; align-items:center; gap:12px; font-weight:600;">
+                        <i data-lucide="info" width="18" height="18"></i>
+                        <?= htmlspecialchars($message) ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 24px; background: var(--kd-bg); border-radius: var(--radius-md); border: 1px solid #E2E8F0; margin-bottom: 32px;">
                 <div>
                     <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
@@ -106,11 +115,9 @@
                         <i data-lucide="info" width="16" height="16" style="display:inline; margin-right:6px;"></i>
                         Réservez immédiatement votre place en un clic.
                     </div>
-                    <form action="<?= BASE_URL ?>passager/reserver/<?= $trajet->id ?>" method="POST">
-                        <button type="submit" style="width: 100%; height: 56px; font-size: 16px; font-weight: 800; border: 0; border-radius: 999px; background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; box-shadow: 0 10px 24px rgba(220, 38, 38, 0.25); cursor: pointer;">
-                            Réserver maintenant <i data-lucide="check-circle"></i>
-                        </button>
-                    </form>
+                    <a href="<?= BASE_URL ?>index.php?url=passager/reserver/<?= $trajet->id ?>" style="display: inline-flex; align-items: center; justify-content: center; width: 100%; height: 56px; font-size: 16px; font-weight: 800; border: 0; border-radius: 999px; background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; box-shadow: 0 10px 24px rgba(220, 38, 38, 0.25); text-decoration: none; cursor: pointer;">
+                        Réserver maintenant <i data-lucide="check-circle" style="margin-left: 10px;"></i>
+                    </a>
                 <?php endif; ?>
             <?php else: ?>
                 <a href="<?= BASE_URL ?>auth/connexion" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 56px; font-size: 16px; font-weight: 800; border: 0; border-radius: 999px; background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; box-shadow: 0 10px 24px rgba(220, 38, 38, 0.25); text-decoration: none;">
