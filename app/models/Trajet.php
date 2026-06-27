@@ -124,10 +124,12 @@ class Trajet {
     public function create(array $data): bool {
         $this->db->query("INSERT INTO trajets
             (conducteur_id, vehicule_id, ville_depart, point_depart, ville_arrivee, point_arrivee,
-             date_trajet, heure_depart, prix_par_place, places_disponibles, places_totales, description, statut)
+             date_trajet, heure_depart, prix_par_place, places_disponibles, places_totales, description,
+             climatisation, musique, fumeur, statut)
             VALUES
             (:conducteur_id, :vehicule_id, :ville_depart, :point_depart, :ville_arrivee, :point_arrivee,
-             :date_trajet, :heure_depart, :prix_par_place, :places_disponibles, :places_totales, :description, 'planifie')");
+             :date_trajet, :heure_depart, :prix_par_place, :places_disponibles, :places_totales, :description,
+             :climatisation, :musique, :fumeur, 'planifie')");
 
         $this->db->bind(':conducteur_id', $data['conducteur_id']);
         $this->db->bind(':vehicule_id', $data['vehicule_id']);
@@ -141,7 +143,33 @@ class Trajet {
         $this->db->bind(':places_disponibles', $data['places_totales']);
         $this->db->bind(':places_totales', $data['places_totales']);
         $this->db->bind(':description', $data['description'] ?: null);
+        $this->db->bind(':climatisation', !empty($data['climatisation']) ? 1 : 0);
+        $this->db->bind(':musique', !empty($data['musique']) ? 1 : 0);
+        $this->db->bind(':fumeur', !empty($data['fumeur']) ? 1 : 0);
 
+        return $this->db->execute();
+    }
+
+    /**
+     * Annule un trajet (uniquement si le conducteur est propriétaire et
+     * qu'aucune réservation confirmée n'existe sur ce trajet)
+     */
+    public function annuler(int $trajetId, int $conducteurId): bool {
+        // Vérifier la propriété et qu'aucune réservation confirmée n'existe
+        $this->db->query("SELECT t.statut,
+                          (SELECT COUNT(*) FROM reservations r WHERE r.trajet_id = t.id AND r.statut = 'confirmee') as nb_confirmees
+                          FROM trajets t WHERE t.id = :id AND t.conducteur_id = :conducteur_id");
+        $this->db->bind(':id', $trajetId);
+        $this->db->bind(':conducteur_id', $conducteurId);
+        $trajet = $this->db->single();
+
+        if (!$trajet || (int)$trajet->nb_confirmees > 0) {
+            return false;
+        }
+
+        $this->db->query("UPDATE trajets SET statut = 'annule' WHERE id = :id AND conducteur_id = :conducteur_id");
+        $this->db->bind(':id', $trajetId);
+        $this->db->bind(':conducteur_id', $conducteurId);
         return $this->db->execute();
     }
 

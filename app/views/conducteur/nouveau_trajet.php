@@ -107,6 +107,21 @@
                 </div>
             </div>
 
+            <div style="display: flex; gap: 24px; margin-bottom: 32px; flex-wrap: wrap;">
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14px; color:var(--text-main);">
+                    <input type="checkbox" name="climatisation" value="1" style="width:18px; height:18px; accent-color: var(--kd-primary);">
+                    <i data-lucide="snowflake" width="16" height="16"></i> Climatisation
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14px; color:var(--text-main);">
+                    <input type="checkbox" name="musique" value="1" checked style="width:18px; height:18px; accent-color: var(--kd-primary);">
+                    <i data-lucide="music" width="16" height="16"></i> Musique
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14px; color:var(--text-main);">
+                    <input type="checkbox" name="fumeur" value="1" style="width:18px; height:18px; accent-color: var(--kd-primary);">
+                    <i data-lucide="cigarette" width="16" height="16"></i> Fumeur autorisé
+                </label>
+            </div>
+
             <div class="input-group" style="margin-bottom: 40px;">
                 <label>Commentaire pour les passagers (Optionnel)</label>
                 <textarea name="description" class="input-field" style="height: 120px; padding: 16px; resize: vertical;" placeholder="Précisez des informations utiles (bagages acceptés, retards tolérés, point de RDV exact...)"></textarea>

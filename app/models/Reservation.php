@@ -135,7 +135,6 @@ class Reservation implements RepositoryInterface {
         $this->db->execute();
 
         try {
-            // Récupérer la réservation
             $this->db->query('SELECT trajet_id, places_reservees, statut FROM reservations WHERE id = :id FOR UPDATE');
             $this->db->bind(':id', $reservation_id);
             $res = $this->db->single();
@@ -146,7 +145,6 @@ class Reservation implements RepositoryInterface {
                 return false;
             }
 
-            // Si on annule et que la réservation était en attente ou confirmée, restituer les places
             if($status === ReservationStatus::ANNULEE->value && in_array($res->statut, [ReservationStatus::EN_ATTENTE->value, ReservationStatus::CONFIRMEE->value], true)) {
                 $this->db->query('UPDATE trajets SET places_disponibles = places_disponibles + :places WHERE id = :trajet_id');
                 $this->db->bind(':places', $res->places_reservees);
@@ -154,7 +152,6 @@ class Reservation implements RepositoryInterface {
                 $this->db->execute();
             }
 
-            // Mettre à jour le statut
             $this->db->query('UPDATE reservations SET statut = :statut WHERE id = :id');
             $this->db->bind(':statut', $status);
             $this->db->bind(':id', $reservation_id);
@@ -181,6 +178,24 @@ class Reservation implements RepositoryInterface {
         $this->db->bind(':reservation_id', $reservation_id);
         $this->db->bind(':passager_id', $passager_id);
         return $this->db->single();
+    }
+
+    /**
+     * Calcule le total des gains d'un conducteur pour le mois en cours
+     * (réservations confirmées dont la date de réservation tombe ce mois-ci)
+     */
+    public function getGainsMoisCourant(int $conducteurId): float {
+        $this->db->query("SELECT COALESCE(SUM(r.prix_total), 0) as total
+                          FROM reservations r
+                          JOIN trajets t ON r.trajet_id = t.id
+                          WHERE t.conducteur_id = :conducteur_id
+                          AND r.statut = :statut
+                          AND MONTH(r.date_reservation) = MONTH(CURDATE())
+                          AND YEAR(r.date_reservation) = YEAR(CURDATE())");
+        $this->db->bind(':conducteur_id', $conducteurId);
+        $this->db->bind(':statut', ReservationStatus::CONFIRMEE->value);
+        $row = $this->db->single();
+        return $row ? (float)$row->total : 0.0;
     }
 
     public function findById(int $id) {

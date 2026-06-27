@@ -26,7 +26,7 @@
 
     <!-- Statistiques Conducteur -->
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 40px;">
-        <div class="glass-panel" style="padding: 24px; display: flex; align-items: center; gap: 20px;">
+        <a href="<?= BASE_URL ?>conducteur/trajets" class="glass-panel" style="padding: 24px; display: flex; align-items: center; gap: 20px; text-decoration:none; color:inherit; transition: transform 0.15s;">
             <div style="width: 56px; height: 56px; background: var(--kd-primary-light); color: var(--kd-primary); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
                 <i data-lucide="map" width="28" height="28"></i>
             </div>
@@ -34,9 +34,9 @@
                 <div style="color: var(--text-muted); font-size: 14px; font-weight: 500;">Trajets actifs</div>
                 <div style="font-family: 'Outfit'; font-size: 32px; font-weight: 700; color: var(--text-main); line-height: 1; margin-top: 4px;"><?= $trajets_actifs ?></div>
             </div>
-        </div>
+        </a>
         
-        <div class="glass-panel" style="padding: 24px; display: flex; align-items: center; gap: 20px;">
+        <a href="<?= BASE_URL ?>conducteur/reservations" class="glass-panel" style="padding: 24px; display: flex; align-items: center; gap: 20px; text-decoration:none; color:inherit; transition: transform 0.15s;">
             <div style="width: 56px; height: 56px; background: rgba(249, 168, 37, 0.1); color: var(--kd-accent-dark); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
                 <i data-lucide="bell" width="28" height="28"></i>
             </div>
@@ -44,7 +44,7 @@
                 <div style="color: var(--text-muted); font-size: 14px; font-weight: 500;">Réservations en attente</div>
                 <div style="font-family: 'Outfit'; font-size: 32px; font-weight: 700; color: var(--text-main); line-height: 1; margin-top: 4px;"><?= $reservations_attente ?></div>
             </div>
-        </div>
+        </a>
         
         <div class="glass-panel" style="padding: 24px; display: flex; align-items: center; gap: 20px;">
             <div style="width: 56px; height: 56px; background: rgba(21, 101, 192, 0.1); color: #1565C0; border-radius: 16px; display: flex; align-items: center; justify-content: center;">
@@ -57,9 +57,14 @@
         </div>
     </div>
 
-    <h3 style="font-size: 20px; margin-bottom: 24px; font-family: 'Outfit'; display: flex; align-items: center; gap: 8px;">
-        <i data-lucide="calendar-check" width="20" height="20" style="color:var(--text-muted);"></i> Mes trajets actifs
-    </h3>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
+        <h3 style="font-size: 20px; margin:0; font-family: 'Outfit'; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="calendar-check" width="20" height="20" style="color:var(--text-muted);"></i> Mes trajets actifs
+        </h3>
+        <a href="<?= BASE_URL ?>conducteur/trajets" style="font-size:14px; font-weight:600; color:var(--kd-primary); text-decoration:none; display:flex; align-items:center; gap:4px;">
+            Voir tous mes trajets <i data-lucide="arrow-right" width="16" height="16"></i>
+        </a>
+    </div>
 
     <?php if(!empty($trajets)): ?>
         <div class="glass-panel" style="margin-bottom: 32px; padding: 0; overflow: hidden; border-radius: 24px;">
@@ -89,10 +94,15 @@
                         <div style="font-size: 20px; font-weight: 800; color: var(--kd-primary);"><?= number_format($trajet->prix_par_place, 0, ',', ' ') ?> F</div>
                     </div>
                     <p style="color: var(--text-muted); margin-bottom: 14px;">Départ : <?= date('d/m/Y', strtotime($trajet->date_trajet)) ?> à <?= substr($trajet->heure_depart, 0, 5) ?></p>
-                    <div style="display:flex; justify-content:space-between; gap:10px; font-size:13px; color:var(--text-muted);">
+                    <div style="display:flex; justify-content:space-between; gap:10px; font-size:13px; color:var(--text-muted); margin-bottom: 16px;">
                         <span><i data-lucide="users" width="14" height="14" style="vertical-align:middle;"></i> <?= $trajet->places_disponibles ?> places restantes</span>
                         <span><i data-lucide="truck" width="14" height="14" style="vertical-align:middle;"></i> <?= htmlspecialchars($trajet->marque . ' ' . $trajet->modele) ?></span>
                     </div>
+                    <form action="<?= BASE_URL ?>conducteur/trajet/<?= $trajet->id ?>/annuler" method="POST" onsubmit="return confirm('Annuler ce trajet ? Cette action est irréversible.');">
+                        <button type="submit" class="btn btn-outline" style="width:100%; justify-content:center; font-size:13px; padding:10px;">
+                            <i data-lucide="x-circle" width="16" height="16"></i> Annuler ce trajet
+                        </button>
+                    </form>
                 </div>
             <?php endforeach; ?>
         </div>
