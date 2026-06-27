@@ -99,8 +99,13 @@
                             <?= substr($trajet->conducteur_prenom, 0, 1) ?>
                         </div>
                         <div style="flex: 1;">
-                            <div style="font-weight: 600; font-size: 14px;"><?= htmlspecialchars($trajet->conducteur_prenom . ' ' . substr($trajet->conducteur_nom, 0, 1) . '.') ?></div>
-                            <div style="font-size: 13px; color: var(--text-muted); display:flex; align-items:center; gap:4px;">
+                            <div style="font-weight: 700; font-size: 14px; color: var(--text-main); display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                                <?= htmlspecialchars($trajet->conducteur_prenom . ' ' . $trajet->conducteur_nom) ?>
+                                <span style="display:inline-flex; align-items:center; gap:4px; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: rgba(34,197,94,0.12); color: #15803d;">
+                                    <i data-lucide="shield-check" width="12" height="12"></i> Conducteur
+                                </span>
+                            </div>
+                            <div style="font-size: 13px; color: var(--text-muted); display:flex; align-items:center; gap:4px; margin-top: 4px;">
                                 <i data-lucide="star" width="12" height="12" style="color:var(--kd-accent-dark); fill:var(--kd-accent-dark);"></i> 4.8/5
                             </div>
                         </div>
