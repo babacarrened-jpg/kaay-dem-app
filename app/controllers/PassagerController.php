@@ -19,7 +19,7 @@ class PassagerController extends Controller {
      * Affiche le dashboard du passager
      */
     public function dashboard() {
-        // Récupérer les réservations
+        // Récupérer les réservations récentes du passager
         $reservations = $this->reservationModel->getByPassager($_SESSION['user_id']);
 
         $data = [
@@ -31,10 +31,70 @@ class PassagerController extends Controller {
     }
 
     /**
+     * Liste toutes les réservations du passager
+     */
+    public function reservations() {
+        $reservations = $this->reservationModel->getByPassager($_SESSION['user_id']);
+
+        $data = [
+            'titre' => 'Mes réservations',
+            'reservations' => $reservations
+        ];
+
+        $this->render('passager/reservations', $data);
+    }
+
+    /**
+     * Affiche les détails et le suivi d'une réservation
+     */
+    public function reservation($id) {
+        $reservation = $this->reservationModel->getDetailById((int)$id, $_SESSION['user_id']);
+
+        if (!$reservation) {
+            die("Réservation introuvable.");
+        }
+
+        $statusMessage = '';
+        $alertType = 'info';
+
+        switch ($reservation->statut) {
+            case 'confirmee':
+                $statusMessage = 'Votre réservation est confirmée. Préparez-vous à embarquer !';
+                $alertType = 'success';
+                break;
+            case 'en_attente':
+                $statusMessage = 'Votre réservation est en attente de confirmation du conducteur.';
+                $alertType = 'warning';
+                break;
+            case 'termine':
+                $statusMessage = 'Ce trajet est terminé. Merci d’avoir voyagé avec nous.';
+                $alertType = 'secondary';
+                break;
+            case 'annulee':
+                $statusMessage = 'Cette réservation a été annulée. Contactez le support pour plus d’informations.';
+                $alertType = 'danger';
+                break;
+            default:
+                $statusMessage = 'Statut de la réservation : ' . ucfirst(str_replace('_', ' ', $reservation->statut));
+                break;
+        }
+
+        $data = [
+            'titre' => 'Suivi de réservation',
+            'reservation' => $reservation,
+            'statusMessage' => $statusMessage,
+            'alertType' => $alertType
+        ];
+
+        $this->render('passager/reservation', $data);
+    }
+
+    /**
      * Traite une demande de réservation
      */
-    public function reserverTrajet($trajet_id) {
-        if($_SERVER['REQUEST_METHOD'] == 'POST') {
+    public function reserverTrajet($trajet_id = null) {
+        if($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'GET') {
+            $trajet_id = $trajet_id ?? ($_POST['trajet_id'] ?? $_GET['trajet_id'] ?? null);
             
             // Récupérer infos du trajet
             $trajet = $this->trajetModel->getById($trajet_id);
@@ -67,4 +127,51 @@ class PassagerController extends Controller {
             $this->redirect('trajets/detail/' . $trajet_id);
         }
     }
+
+    public function devenirConducteurForm() {
+    // Vérifier si déjà conducteur
+    if($_SESSION['user_role'] === 'conducteur' || $_SESSION['est_conducteur_valide']) {
+        $this->redirect('conducteur/dashboard');
+    }
+
+    $data = ['titre' => 'Devenir Conducteur - Kaay Dem !'];
+    $this->render('passager/devenir_conducteur', $data);
+}
+
+public function devenirConducteur() {
+    if($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        $this->redirect('passager/dashboard');
+    }
+
+    // Vérifier les fichiers
+    if(empty($_FILES['permis_recto']['name']) || empty($_FILES['permis_verso']['name'])) {
+        $this->redirect('passager/devenirConducteur?error=fichiers_manquants');
+    }
+
+    // Dossier upload
+    $uploadDir = '../public/assets/uploads/permis/';
+    if(!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+
+    // Upload recto
+    $rectoExt = pathinfo($_FILES['permis_recto']['name'], PATHINFO_EXTENSION);
+    $rectoName = 'permis_' . $_SESSION['user_id'] . '_recto_' . time() . '.' . $rectoExt;
+    move_uploaded_file($_FILES['permis_recto']['tmp_name'], $uploadDir . $rectoName);
+
+    // Upload verso
+    $versoExt = pathinfo($_FILES['permis_verso']['name'], PATHINFO_EXTENSION);
+    $versoName = 'permis_' . $_SESSION['user_id'] . '_verso_' . time() . '.' . $versoExt;
+    move_uploaded_file($_FILES['permis_verso']['tmp_name'], $uploadDir . $versoName);
+
+    $userModel = $this->model('User');
+    $result = $userModel->demanderConducteur((int)$_SESSION['user_id'], $rectoName, $versoName);
+
+    if($result) {
+        $this->redirect('passager/dashboard?success=demande_envoyee');
+    } else {
+        $this->redirect('passager/devenirConducteur?error=demande_existante');
+    }
+}
+
 }

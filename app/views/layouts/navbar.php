@@ -46,8 +46,12 @@
 
                 <?php
                 $dashboard_link = BASE_URL . 'passager/dashboard';
-                if ($_SESSION['user_role'] == 'admin') $dashboard_link = BASE_URL . 'admin/dashboard';
-                if ($_SESSION['user_role'] == 'conducteur') $dashboard_link = BASE_URL . 'conducteur/dashboard';
+                $roles = $_SESSION['user_roles'] ?? [$_SESSION['user_role'] ?? ''];
+                if (in_array('admin', $roles, true)) {
+                    $dashboard_link = BASE_URL . 'admin/dashboard';
+                } elseif (in_array('conducteur', $roles, true)) {
+                    $dashboard_link = BASE_URL . 'conducteur/dashboard';
+                }
                 ?>
 
                 <!-- Dashboard icon -->
@@ -69,7 +73,7 @@
                         <span class="text-xs font-semibold text-slate-900 leading-none group-hover:text-brand-700 transition-colors">
                             <?= htmlspecialchars($_SESSION['user_prenom']) ?>
                         </span>
-                        <span class="text-[10px] text-slate-400 mt-0.5"><?= ucfirst($_SESSION['user_role']) ?></span>
+                        <span class="text-[10px] text-slate-400 mt-0.5"><?= ucfirst($_SESSION['user_role']) ?><?= isset($_SESSION['est_conducteur_valide']) && $_SESSION['est_conducteur_valide'] ? ' (conducteur validé)' : '' ?></span>
                     </div>
                 </a>
 
@@ -164,7 +168,7 @@
                     </div>
                     <div>
                         <div class="text-sm font-semibold text-slate-900"><?= htmlspecialchars($_SESSION['user_prenom']) ?></div>
-                        <div class="text-xs text-slate-400"><?= ucfirst($_SESSION['user_role']) ?> &bull; Voir le profil</div>
+                        <div class="text-xs text-slate-400"><?= ucfirst($_SESSION['user_role']) ?> <?= isset($_SESSION['est_conducteur_valide']) && $_SESSION['est_conducteur_valide'] ? '(Conducteur validé)' : '' ?> &bull; Voir le profil</div>
                     </div>
                 </a>
 

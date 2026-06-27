@@ -87,7 +87,13 @@ class AuthController extends Controller {
 
                 // Inscription via le modèle
                 if($this->userModel->register($data)) {
-                    // Redirection vers connexion
+                    // Connexion automatique après inscription pour permettre la réservation immédiate
+                    $newUser = $this->userModel->login($data['email'], $postData['mot_de_passe']);
+                    if($newUser) {
+                        $this->createUserSession($newUser);
+                    }
+
+                    // Fallback : rediriger vers la page de connexion si l'auto-connexion échoue
                     $this->redirect('auth/connexion?success=inscrit');
                 } else {
                     die("Une erreur est survenue lors de l'inscription.");
@@ -168,11 +174,24 @@ class AuthController extends Controller {
         $_SESSION['user_prenom'] = $user->prenom;
         $_SESSION['user_role'] = $user->role;
         $_SESSION['est_conducteur_valide'] = $user->est_conducteur_valide;
-        
-        // Redirection selon le rôle
+
+        // Permettre à un utilisateur validé conducteur de conserver aussi le rôle passager
+        $roles = [$user->role];
+        if($user->role !== 'admin') {
+            if($user->role !== 'conducteur') {
+                $roles[] = 'passager';
+            }
+            if($user->est_conducteur_valide || $user->role === 'conducteur') {
+                $roles[] = 'conducteur';
+            }
+        }
+
+        $_SESSION['user_roles'] = array_values(array_unique($roles));
+
+        // Redirection selon le rôle principal
         if($user->role == 'admin') {
             $this->redirect('admin/dashboard');
-        } elseif($user->role == 'conducteur') {
+        } elseif($user->role == 'conducteur' || $user->est_conducteur_valide) {
             $this->redirect('conducteur/dashboard');
         } else {
             $this->redirect('passager/dashboard');
@@ -188,6 +207,8 @@ class AuthController extends Controller {
         unset($_SESSION['user_nom']);
         unset($_SESSION['user_prenom']);
         unset($_SESSION['user_role']);
+        unset($_SESSION['user_roles']);
+        unset($_SESSION['est_conducteur_valide']);
         session_destroy();
         
         $this->redirect('auth/connexion');

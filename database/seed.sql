@@ -3,10 +3,13 @@
 -- ========================================================
 
 -- Insérer des utilisateurs de test
+-- Les mots de passe sont stockés en hash PHP pour correspondre à password_verify()
 INSERT INTO utilisateurs (nom, prenom, email, telephone, mot_de_passe, role, est_conducteur_valide, statut) VALUES
-('Diallo', 'Amadou', 'amadou.diallo@example.com', '+221772345678', '$2y$10$...', 'conducteur', TRUE, 'actif'),
-('Ndiaye', 'Aïssatou', 'aissatou.ndiaye@example.com', '+221783456789', '$2y$10$...', 'passager', FALSE, 'actif'),
-('Seck', 'Moussa', 'moussa.seck@example.com', '+221794567890', '$2y$10$...', 'passager', FALSE, 'actif');
+('Diallo', 'Amadou', 'amadou@test.com', '+221772345678', '$2y$10$FBMaCC6G2v4S3P12pGNbiOL/qk7zNbNRjDFE43tEVvqzecUqfJ4mK', 'conducteur', TRUE, 'actif'),
+('Ndiaye', 'Marie', 'passager@test.com', '+221783456789', '$2y$10$fEYKGH5GQfB5h7Fv7Ncn4OiQ2AZDUmW3AvMqW6F/MZyf3rnVGbgwO', 'passager', FALSE, 'actif'),
+('Seck', 'Moussa', 'moussadiop@gmail.com', '+221794567890', '$2y$10$fEYKGH5GQfB5h7Fv7Ncn4OiQ2AZDUmW3AvMqW6F/MZyf3rnVGbgwO', 'passager', FALSE, 'actif'),
+('Dione', 'Babacar', 'babacarrened@gmail.com', '+221776543210', '$2y$10$NdKu.AmqRM8FG9yHiXv7L.8W6c/j7tpaLwQKWQAcGhw96VRfPGzGa', 'passager', FALSE, 'actif'),
+('Admin', 'Super', 'admin@test.com', '+221700000000', '$2y$10$QKMeZLZ/QNoRwlIdkU08QeLPBp/albQT5nSv.ZDJxdcGX2jFur3N2', 'admin', FALSE, 'actif');
 
 -- Insérer des véhicules
 INSERT INTO vehicules (conducteur_id, marque, modele, couleur, immatriculation, nombre_places) VALUES
@@ -18,3 +21,4 @@ INSERT INTO trajets (conducteur_id, vehicule_id, ville_depart, point_depart, vil
 (1, 1, 'Dakar', 'Gare Routière de Dakar', 'Diamniadio', 'Rond-point de Diamniadio', DATE_ADD(CURDATE(), INTERVAL 1 DAY), '08:00:00', 1500, 4, 4, 'Trajet confortable avec climatisation. Départ tôt le matin.', TRUE, TRUE, FALSE, 'planifie'),
 (1, 1, 'Dakar', 'Plateau', 'Rufisque', 'Centre-ville', DATE_ADD(CURDATE(), INTERVAL 2 DAY), '14:30:00', 800, 3, 4, 'Trajet l\'après-midi, idéal pour les étudiants.', TRUE, TRUE, FALSE, 'planifie'),
 (1, 2, 'Dakar', 'Gare Routière de Dakar', 'Diamniadio', 'Rond-point de Diamniadio', DATE_ADD(CURDATE(), INTERVAL 3 DAY), '10:00:00', 1200, 4, 4, 'Véhicule confortable, nouveau modèle.', FALSE, TRUE, FALSE, 'planifie');
+    

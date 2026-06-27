@@ -57,9 +57,18 @@
             </a>
         </div>
     <?php else: ?>
-        <div style="margin-bottom: 20px; color: var(--text-muted); font-size: 14px; display: flex; align-items: center; gap: 8px;">
+        <div style="margin-bottom: 20px; color: var(--text-muted); font-size: 14px; display: flex; flex-wrap: wrap; gap: 16px; align-items: center;">
             <i data-lucide="info" width="16" height="16"></i>
             Cliquez sur une offre pour voir les détails puis réserver.
+            <?php if(!empty($prix_min) || !empty($prix_max) || !empty($places_min) || !empty($places_max)): ?>
+                <span style="display:inline-flex; align-items:center; gap:4px; padding:6px 12px; background:#F8FAFC; border-radius:999px;">
+                    <strong>Filtres :</strong>
+                    <?= !empty($prix_min) ? 'Prix min ' . htmlspecialchars($prix_min) . ' F' : '' ?>
+                    <?= !empty($prix_max) ? 'Prix max ' . htmlspecialchars($prix_max) . ' F' : '' ?>
+                    <?= !empty($places_min) ? 'Places min ' . htmlspecialchars($places_min) : '' ?>
+                    <?= !empty($places_max) ? 'Places max ' . htmlspecialchars($places_max) : '' ?>
+                </span>
+            <?php endif; ?>
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
             <?php foreach($trajets as $trajet): ?>
@@ -109,6 +118,31 @@
                 </div>
             <?php endforeach; ?>
         </div>
+
+        <?php if(!empty($pagination) && $pagination['totalPages'] > 1): ?>
+            <div style="margin-top: 32px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;">
+                <?php for($p = 1; $p <= $pagination['totalPages']; $p++): ?>
+                    <?php
+                        $queryParams = array_filter([
+                            'depart' => $depart,
+                            'arrivee' => $arrivee,
+                            'date' => $date,
+                            'prix_min' => $prix_min,
+                            'prix_max' => $prix_max,
+                            'places_min' => $places_min,
+                            'places_max' => $places_max,
+                            'page' => $p
+                        ], fn($value) => $value !== '' && $value !== null);
+                        $query = http_build_query($queryParams);
+                    ?>
+                    <a href="<?= BASE_URL ?>trajets/resultats?<?= $query ?>"
+                       class="btn <?= $p === $pagination['currentPage'] ? 'btn-primary' : 'btn-outline' ?>"
+                       style="min-width: 44px; padding: 10px 14px;">
+                        <?= $p ?>
+                    </a>
+                <?php endfor; ?>
+            </div>
+        <?php endif; ?>
     <?php endif; ?>
 </div>
 
