@@ -48,6 +48,9 @@ $router->get('/conducteur/trajets/nouveau', 'ConducteurController', 'nouveauTraj
 $router->post('/conducteur/trajets/nouveau', 'ConducteurController', 'creerTrajet');
 $router->get('/conducteur/vehicule/nouveau', 'ConducteurController', 'nouveauVehiculeForm');
 $router->post('/conducteur/vehicule/nouveau', 'ConducteurController', 'creerVehicule');
+$router->post('/conducteur/trajet/{trajet_id}/annuler', 'ConducteurController', 'annulerTrajet');
+$router->get('/conducteur/passagers', 'ConducteurController', 'mesPassagers'); // ← ajoute ça
+
 // Gestion des réservations pour conducteurs
 $router->get('/conducteur/reservations', 'ConducteurController', 'reservations');
 $router->post('/conducteur/reservation/{reservation_id}/accept', 'ConducteurController', 'acceptReservation');
@@ -77,3 +80,4 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // Lancement du Dispatcher
 $router->dispatch($uri, $method);
+//

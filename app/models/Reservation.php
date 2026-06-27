@@ -39,6 +39,15 @@ class Reservation implements RepositoryInterface {
                 ? ReservationStatus::CONFIRMEE->value
                 : ReservationStatus::EN_ATTENTE->value;
 
+            $this->db->query("SELECT id FROM reservations WHERE passager_id = :passager_id AND trajet_id = :trajet_id AND statut IN ('en_attente', 'confirmee')");
+            $this->db->bind(':passager_id', $passager_id);
+            $this->db->bind(':trajet_id', $trajet_id);
+            $existing = $this->db->single();
+
+            if ($existing) {
+                throw new ReservationConflictException();
+            }
+
             $this->db->query("SELECT COUNT(*) as count_reservations FROM reservations r JOIN trajets t ON r.trajet_id = t.id WHERE r.passager_id = :passager_id AND r.statut IN ('en_attente', 'confirmee') AND t.date_trajet = :date_trajet AND t.id <> :trajet_id");
             $this->db->bind(':passager_id', $passager_id);
             $this->db->bind(':date_trajet', $trajet->date_trajet);
@@ -135,7 +144,6 @@ class Reservation implements RepositoryInterface {
         $this->db->execute();
 
         try {
-            // Récupérer la réservation
             $this->db->query('SELECT trajet_id, places_reservees, statut FROM reservations WHERE id = :id FOR UPDATE');
             $this->db->bind(':id', $reservation_id);
             $res = $this->db->single();
@@ -146,7 +154,6 @@ class Reservation implements RepositoryInterface {
                 return false;
             }
 
-            // Si on annule et que la réservation était en attente ou confirmée, restituer les places
             if($status === ReservationStatus::ANNULEE->value && in_array($res->statut, [ReservationStatus::EN_ATTENTE->value, ReservationStatus::CONFIRMEE->value], true)) {
                 $this->db->query('UPDATE trajets SET places_disponibles = places_disponibles + :places WHERE id = :trajet_id');
                 $this->db->bind(':places', $res->places_reservees);
@@ -154,10 +161,46 @@ class Reservation implements RepositoryInterface {
                 $this->db->execute();
             }
 
-            // Mettre à jour le statut
             $this->db->query('UPDATE reservations SET statut = :statut WHERE id = :id');
             $this->db->bind(':statut', $status);
             $this->db->bind(':id', $reservation_id);
+            $this->db->execute();
+
+            $this->db->query('COMMIT');
+            $this->db->execute();
+            return true;
+        } catch (Exception $e) {
+            $this->db->query('ROLLBACK');
+            $this->db->execute();
+            return false;
+        }
+    }
+
+    public function cancelByPassager(int $reservation_id, int $passager_id): bool {
+        $this->db->query('START TRANSACTION');
+        $this->db->execute();
+
+        try {
+            $this->db->query('SELECT trajet_id, places_reservees, statut FROM reservations WHERE id = :id AND passager_id = :passager_id FOR UPDATE');
+            $this->db->bind(':id', $reservation_id);
+            $this->db->bind(':passager_id', $passager_id);
+            $res = $this->db->single();
+
+            if (!$res || !in_array($res->statut, [ReservationStatus::EN_ATTENTE->value, ReservationStatus::CONFIRMEE->value], true)) {
+                $this->db->query('ROLLBACK');
+                $this->db->execute();
+                return false;
+            }
+
+            $this->db->query('UPDATE trajets SET places_disponibles = places_disponibles + :places WHERE id = :trajet_id');
+            $this->db->bind(':places', $res->places_reservees);
+            $this->db->bind(':trajet_id', $res->trajet_id);
+            $this->db->execute();
+
+            $this->db->query('UPDATE reservations SET statut = :statut WHERE id = :id AND passager_id = :passager_id');
+            $this->db->bind(':statut', ReservationStatus::ANNULEE->value);
+            $this->db->bind(':id', $reservation_id);
+            $this->db->bind(':passager_id', $passager_id);
             $this->db->execute();
 
             $this->db->query('COMMIT');
@@ -181,6 +224,24 @@ class Reservation implements RepositoryInterface {
         $this->db->bind(':reservation_id', $reservation_id);
         $this->db->bind(':passager_id', $passager_id);
         return $this->db->single();
+    }
+
+    /**
+     * Calcule le total des gains d'un conducteur pour le mois en cours
+     * (réservations confirmées dont la date de réservation tombe ce mois-ci)
+     */
+    public function getGainsMoisCourant(int $conducteurId): float {
+        $this->db->query("SELECT COALESCE(SUM(r.prix_total), 0) as total
+                          FROM reservations r
+                          JOIN trajets t ON r.trajet_id = t.id
+                          WHERE t.conducteur_id = :conducteur_id
+                          AND r.statut = :statut
+                          AND MONTH(r.date_reservation) = MONTH(CURDATE())
+                          AND YEAR(r.date_reservation) = YEAR(CURDATE())");
+        $this->db->bind(':conducteur_id', $conducteurId);
+        $this->db->bind(':statut', ReservationStatus::CONFIRMEE->value);
+        $row = $this->db->single();
+        return $row ? (float)$row->total : 0.0;
     }
 
     public function findById(int $id) {
@@ -216,5 +277,26 @@ class Reservation implements RepositoryInterface {
         $this->db->query('DELETE FROM reservations WHERE id = :id');
         $this->db->bind(':id', $id);
         return $this->db->execute();
+    }
+    /**
+ * Récupère tous les passagers des trajets d'un conducteur
+ */
+    public function getPassagersByConducteur(int $conducteur_id): array {
+        $this->db->query("SELECT 
+                            u.id, u.nom, u.prenom, u.email, u.telephone, u.photo_profil,
+                            r.id AS reservation_id,
+                            r.places_reservees, r.prix_total,
+                            r.statut AS reservation_statut,
+                            r.date_reservation,
+                            t.id AS trajet_id,
+                            t.ville_depart, t.ville_arrivee,
+                            t.date_trajet, t.heure_depart
+                        FROM reservations r
+                        JOIN utilisateurs u ON u.id = r.passager_id
+                        JOIN trajets t ON t.id = r.trajet_id
+                        WHERE t.conducteur_id = :conducteur_id
+                        ORDER BY r.date_reservation DESC");
+        $this->db->bind(':conducteur_id', $conducteur_id);
+        return $this->db->resultSet();
     }
 }

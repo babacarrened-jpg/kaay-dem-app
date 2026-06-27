@@ -51,27 +51,32 @@ class PassagerController extends Controller {
         $reservation = $this->reservationModel->getDetailById((int)$id, $_SESSION['user_id']);
 
         if (!$reservation) {
-            die("Réservation introuvable.");
+            $this->redirect('passager/reservations?error=reservation_introuvable');
         }
 
         $statusMessage = '';
         $alertType = 'info';
+        $canCancel = in_array($reservation->statut, [ReservationStatus::EN_ATTENTE->value, ReservationStatus::CONFIRMEE->value], true);
 
         switch ($reservation->statut) {
-            case 'confirmee':
+            case ReservationStatus::CONFIRMEE->value:
                 $statusMessage = 'Votre réservation est confirmée. Préparez-vous à embarquer !';
                 $alertType = 'success';
                 break;
-            case 'en_attente':
+            case ReservationStatus::EN_ATTENTE->value:
                 $statusMessage = 'Votre réservation est en attente de confirmation du conducteur.';
                 $alertType = 'warning';
                 break;
-            case 'termine':
+            case ReservationStatus::TERMINEE->value:
                 $statusMessage = 'Ce trajet est terminé. Merci d’avoir voyagé avec nous.';
                 $alertType = 'secondary';
                 break;
-            case 'annulee':
+            case ReservationStatus::ANNULEE->value:
                 $statusMessage = 'Cette réservation a été annulée. Contactez le support pour plus d’informations.';
+                $alertType = 'danger';
+                break;
+            case 'refusee':
+                $statusMessage = 'Le conducteur a refusé votre réservation.';
                 $alertType = 'danger';
                 break;
             default:
@@ -83,10 +88,26 @@ class PassagerController extends Controller {
             'titre' => 'Suivi de réservation',
             'reservation' => $reservation,
             'statusMessage' => $statusMessage,
-            'alertType' => $alertType
+            'alertType' => $alertType,
+            'canCancel' => $canCancel
         ];
 
         $this->render('passager/reservation', $data);
+    }
+
+    public function annulerReservation($reservation_id) {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('passager/reservations');
+        }
+
+        $reservation_id = (int)$reservation_id;
+        $ok = $this->reservationModel->cancelByPassager($reservation_id, (int)$_SESSION['user_id']);
+
+        if ($ok) {
+            $this->redirect('passager/reservation/' . $reservation_id . '?success=reservation_annulee');
+        }
+
+        $this->redirect('passager/reservation/' . $reservation_id . '?error=annulation_impossible');
     }
 
     /**

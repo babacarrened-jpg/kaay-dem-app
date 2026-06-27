@@ -12,6 +12,18 @@
         <a href="<?= BASE_URL ?>conducteur/trajets/nouveau" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:8px;"> <i data-lucide="plus-circle"></i> Nouveau trajet</a>
     </div>
 
+    <?php if(isset($_GET['success']) && $_GET['success'] == 'trajet_annule'): ?>
+        <div style="background:#DCFCE7; color:#166534; padding: 16px 20px; border-radius: 12px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+            <i data-lucide="check-circle" width="20" height="20"></i> Le trajet a bien été annulé.
+        </div>
+    <?php endif; ?>
+
+    <?php if(isset($_GET['error']) && $_GET['error'] == 'annulation_impossible'): ?>
+        <div style="background:#FEE2E2; color:#991B1B; padding: 16px 20px; border-radius: 12px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+            <i data-lucide="alert-circle" width="20" height="20"></i> Impossible d'annuler ce trajet : une réservation a déjà été confirmée.
+        </div>
+    <?php endif; ?>
+
     <?php if(empty($trajets)): ?>
         <div class="glass-panel" style="padding: 60px 24px; text-align: center; border: 1px solid #E2E8F0;">
             <div style="font-size: 52px; color: #ef4444; margin-bottom: 24px;">🚗</div>
@@ -20,8 +32,17 @@
             <a href="<?= BASE_URL ?>conducteur/trajets/nouveau" class="btn btn-outline">Publier un trajet</a>
         </div>
     <?php else: ?>
+        <?php
+        $statutLabels = [
+            'planifie' => ['label' => 'Planifié', 'class' => 'status-success', 'bg' => '#DCFCE7', 'color' => '#166534'],
+            'en_cours' => ['label' => 'En cours', 'class' => 'status-info', 'bg' => '#DBEAFE', 'color' => '#1E40AF'],
+            'termine' => ['label' => 'Terminé', 'class' => 'status-secondary', 'bg' => '#E2E8F0', 'color' => '#475569'],
+            'annule' => ['label' => 'Annulé', 'class' => 'status-danger', 'bg' => '#FEE2E2', 'color' => '#991B1B'],
+        ];
+        ?>
         <div style="display: grid; gap: 18px;">
             <?php foreach($trajets as $trajet): ?>
+                <?php $statutInfo = $statutLabels[$trajet->statut] ?? ['label' => ucfirst($trajet->statut), 'bg' => '#E2E8F0', 'color' => '#475569']; ?>
                 <div class="glass-panel" style="padding: 24px; border: 1px solid #E2E8F0;">
                     <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:20px; align-items:flex-start;">
                         <div>
@@ -35,7 +56,15 @@
                         </div>
                         <div style="text-align:right; min-width:180px;">
                             <div style="font-size: 18px; font-weight: 700; color: #dc2626; margin-bottom: 8px;"><?= number_format($trajet->prix_par_place, 0, ',', ' ') ?> F</div>
-                            <span class="status-badge status-success" style="padding: 10px 16px; border-radius: 999px; display:inline-flex; align-items:center; gap:6px;">Disponible</span>
+                            <span style="padding: 8px 16px; border-radius: 999px; display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; background:<?= $statutInfo['bg'] ?>; color:<?= $statutInfo['color'] ?>; margin-bottom: 12px;"><?= $statutInfo['label'] ?></span>
+
+                            <?php if(in_array($trajet->statut, ['planifie', 'en_cours'], true)): ?>
+                                <form action="<?= BASE_URL ?>conducteur/trajet/<?= $trajet->id ?>/annuler" method="POST" onsubmit="return confirm('Annuler ce trajet ? Cette action est irréversible.');">
+                                    <button type="submit" class="btn btn-outline" style="width:100%; justify-content:center; font-size:13px; padding:8px 12px;">
+                                        <i data-lucide="x-circle" width="14" height="14"></i> Annuler
+                                    </button>
+                                </form>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>

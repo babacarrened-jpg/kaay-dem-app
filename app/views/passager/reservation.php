@@ -1,3 +1,10 @@
+<?php
+$reservation = $reservation ?? null;
+$statusMessage = $statusMessage ?? '';
+$alertType = $alertType ?? 'info';
+?>
+<?php $canCancel = $canCancel ?? false; ?>
+<?php if ($reservation): ?>
 <div style="max-width: 1000px; margin: 40px auto; padding: 0 20px;">
     <div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-start; gap:20px; margin-bottom:32px;">
         <div style="display:flex; align-items:center; gap:16px;">
@@ -11,6 +18,18 @@
         </div>
         <a href="<?= BASE_URL ?>passager/reservations" class="btn btn-outline" style="display:inline-flex; align-items:center; gap:10px;"> <i data-lucide="list"></i> Retour aux réservations</a>
     </div>
+
+    <?php if(isset($_GET['success']) && $_GET['success'] === 'reservation_annulee'): ?>
+        <div style="margin-bottom:24px; padding:16px 20px; border-radius:18px; background:rgba(20,184,166,0.12); color:#115e59; border:1px solid rgba(20,184,166,0.25);">
+            Votre réservation a bien été annulée.
+        </div>
+    <?php endif; ?>
+
+    <?php if(isset($_GET['error']) && $_GET['error'] === 'annulation_impossible'): ?>
+        <div style="margin-bottom:24px; padding:16px 20px; border-radius:18px; background:rgba(239,68,68,0.12); color:#991b1b; border:1px solid rgba(239,68,68,0.25);">
+            Impossible d’annuler cette réservation à ce stade.
+        </div>
+    <?php endif; ?>
 
     <div style="display:grid; grid-template-columns: 1.4fr 0.8fr; gap:24px; align-items:flex-start;">
         <div class="glass-panel" style="padding:28px; border:1px solid #E2E8F0;">
@@ -123,7 +142,23 @@
                         <strong><?= $reservation->places_disponibles ?> / <?= $reservation->places_totales ?></strong>
                     </div>
                 </div>
+
+                <?php if ($canCancel): ?>
+                    <form action="<?= BASE_URL ?>passager/reservation/<?= $reservation->id ?>/annuler" method="POST" style="margin-top:18px;" onsubmit="return confirm('Annuler cette réservation ?');">
+                        <button type="submit" class="btn btn-outline" style="width:100%; border-color:#fecaca; color:#b91c1c;">
+                            Annuler la réservation
+                        </button>
+                    </form>
+                <?php endif; ?>
             </div>
         </aside>
     </div>
 </div>
+<?php else: ?>
+<div style="max-width: 1000px; margin: 40px auto; padding: 0 20px;">
+    <div class="glass-panel" style="padding: 32px; text-align: center;">
+        <h2 style="margin-bottom: 12px;">Réservation introuvable</h2>
+        <p style="color: #64748b;">Cette réservation n’existe pas ou n’est plus accessible.</p>
+    </div>
+</div>
+<?php endif; ?>
