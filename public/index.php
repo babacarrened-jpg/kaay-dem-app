@@ -99,7 +99,10 @@ $uri = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];
 
 if (!empty($_GET['url'])) {
-    $uri = '/' . trim($_GET['url'], '/');
+    $uri = '/' . trim($_GET['url'git add .
+git commit -m "intégration des cartes et Le dashboard passe maintenant par une vérification côté PHP sur la date/heure réelle du trajet, et les trajets"
+git push
+], '/');
 }
 
 $router->dispatch($uri, $method);

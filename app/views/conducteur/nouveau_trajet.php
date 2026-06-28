@@ -84,14 +84,24 @@
                     <label>Ville de départ *</label>
                     <div style="position:relative;">
                         <i data-lucide="map-pin" style="position:absolute; left:16px; top:14px; color:#94a3b8; width:20px; height:20px;"></i>
-                        <input type="text" name="ville_depart" class="input-field" required placeholder="Ex: Dakar" style="padding-left:48px;">
+                        <select name="ville_depart" class="input-field" required style="padding-left:48px; appearance:none;">
+                            <option value="">Choisir une ville</option>
+                            <option value="Dakar">Dakar</option>
+                            <option value="Rufisque">Rufisque</option>
+                            <option value="Diamniadio">Diamniadio</option>
+                        </select>
                     </div>
                 </div>
                 <div class="input-group" style="margin:0;">
                     <label>Ville d'arrivée *</label>
                     <div style="position:relative;">
                         <i data-lucide="map-pin" style="position:absolute; left:16px; top:14px; color:#94a3b8; width:20px; height:20px;"></i>
-                        <input type="text" name="ville_arrivee" class="input-field" required placeholder="Ex: Thiès" style="padding-left:48px;">
+                        <select name="ville_arrivee" class="input-field" required style="padding-left:48px; appearance:none;">
+                            <option value="">Choisir une ville</option>
+                            <option value="Dakar">Dakar</option>
+                            <option value="Rufisque">Rufisque</option>
+                            <option value="Diamniadio">Diamniadio</option>
+                        </select>
                     </div>
                 </div>
             </div>

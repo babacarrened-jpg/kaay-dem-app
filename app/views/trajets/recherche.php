@@ -43,7 +43,12 @@
                         </label>
                         <div style="position: relative;">
                             <i data-lucide="map-pin" style="position: absolute; left: 18px; top: 20px; width: 22px; height: 22px; color: #9ca3af;"></i>
-                            <input type="text" name="depart" placeholder="Ex : Dakar, Rufisque..." style="height: 62px; padding-left: 55px; font-size: 16px; width: 100%; box-sizing: border-box; border: 1px solid #e5e7eb; border-radius: 14px; background: white; color: #111827;">
+                            <select name="depart" style="height: 62px; padding-left: 55px; font-size: 16px; width: 100%; box-sizing: border-box; border: 1px solid #e5e7eb; border-radius: 14px; background: white; color: #111827;">
+                                <option value="">Choisir une ville</option>
+                                <option value="Dakar">Dakar</option>
+                                <option value="Rufisque">Rufisque</option>
+                                <option value="Diamniadio">Diamniadio</option>
+                            </select>
                         </div>
                     </div>
 
@@ -53,7 +58,12 @@
                         </label>
                         <div style="position: relative;">
                             <i data-lucide="map-pin" style="position: absolute; left: 18px; top: 20px; width: 22px; height: 22px; color: #9ca3af;"></i>
-                            <input type="text" name="arrivee" placeholder="Ex : Diamniadio..." style="height: 62px; padding-left: 55px; font-size: 16px; width: 100%; box-sizing: border-box; border: 1px solid #e5e7eb; border-radius: 14px; background: white; color: #111827;">
+                            <select name="arrivee" style="height: 62px; padding-left: 55px; font-size: 16px; width: 100%; box-sizing: border-box; border: 1px solid #e5e7eb; border-radius: 14px; background: white; color: #111827;">
+                                <option value="">Choisir une ville</option>
+                                <option value="Dakar">Dakar</option>
+                                <option value="Rufisque">Rufisque</option>
+                                <option value="Diamniadio">Diamniadio</option>
+                            </select>
                         </div>
                     </div>
                 </div>

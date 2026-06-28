@@ -1,29 +1,31 @@
-<div style="max-width: 1100px; margin: 40px auto; padding: 0 20px;">
+<div style="min-height: 100vh; padding: 40px 20px 60px; box-sizing: border-box; background-color: #f7f9fa; background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCAxNDAgODAiPjx0ZXh0IHg9IjE1IiB5PSIzMCIgZmlsbD0iI2RjMjYyNiIgb3BhY2l0eT0iMC4wNyIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtd2VpZ2h0PSI5MDAiIGZvbnQtc2l6ZT0iMTIiIGxldHRlci1zcGFjaW5nPSIwLjVweSI+S0FBWTwvdGV4dD48dGV4dCB4PSIxNSIgeT0iNDUiIGZpbGw9IiNkYzI2MjYiIG9wYWNpdHk9IjAuMDciIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXdlaWdodD0iOTAwIiBmb250LXNpemU9IjEyIiBsZXR0ZXItc3BhY2luZz0iMC41cHkiPkRFTU08L3RleHQ+PHRleHQgeD0iODUiIHk9IjcwIiBmaWxsPSIjZGMyNjI2IiBvcGFjaXR5PSIwLjA3IiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9IjkwMCIgZm9udC1zaXplPSIxMiIgbGV0dGVyLXNwYWNpbmc9IjAuNXB5Ij5LQUFZPC90ZXh0Pjx0ZXh0IHg9Ijg1IiB5PSI4NSIgZmlsbD0iI2RjMjYyNiIgb3BhY2l0eT0iMC4wNyIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtd2VpZ2h0PSI5MDAiIGZvbnQtc2l6ZT0iMTIiIGxldHRlci1zcGFjaW5nPSIwLjVweSI+REVNTTwvdGV4dD48L3N2Zz4='); background-repeat: repeat; font-family: system-ui, -apple-system, sans-serif;">
 
-    <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; gap:20px; margin-bottom:32px;">
-        <div class="page-title-group" style="display:flex; align-items:center; gap:16px;">
-            <div class="page-title-icon" style="width:56px; height:56px; background:#dc2626; color:white; border-radius:18px; display:flex; align-items:center; justify-content:center;">
-                <i data-lucide="car" width="28" height="28"></i>
-            </div>
-            <div>
-                <h1 style="font-size:2rem; margin:0;">Espace Conducteur</h1>
-                <p style="margin:4px 0 0; color:#64748b;">Gérez vos trajets et réservations.</p>
-            </div>
-        </div>
-        <a href="<?= BASE_URL ?>conducteur/trajets/nouveau"
-           class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 hover:-translate-y-0.5 transition-all duration-200 shadow-md hover:shadow-lg"
-           style="text-decoration:none;">
-            <i data-lucide="plus-circle" width="20" height="20" style="vertical-align:middle;"></i>
-            Nouveau trajet
-        </a>
-    </div>
+    <div style="max-width: 1100px; margin: 0 auto;">
 
-    <?php if(isset($_GET['success']) && $_GET['success'] == 'trajet_publie'): ?>
-        <div style="background:#DCFCE7; color:#166534; padding:16px 20px; border-radius:12px; margin-bottom:32px; display:flex; align-items:center; gap:12px;">
-            <i data-lucide="check-circle" width="24" height="24"></i>
-            <strong>Félicitations !</strong> Votre trajet a bien été publié.
+        <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; gap:20px; margin-bottom:32px; padding:24px 28px; border-radius:24px; background:rgba(255,255,255,0.8); border:1px solid rgba(229,231,235,0.7); box-shadow:0 16px 40px rgba(0,0,0,0.04); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);">
+            <div class="page-title-group" style="display:flex; align-items:center; gap:16px;">
+                <div class="page-title-icon" style="width:56px; height:56px; background:#dc2626; color:white; border-radius:18px; display:flex; align-items:center; justify-content:center;">
+                    <i data-lucide="car" width="28" height="28"></i>
+                </div>
+                <div>
+                    <h1 style="font-size:2rem; margin:0;">Espace Conducteur</h1>
+                    <p style="margin:4px 0 0; color:#64748b;">Gérez vos trajets et réservations.</p>
+                </div>
+            </div>
+            <a href="<?= BASE_URL ?>conducteur/trajets/nouveau"
+               class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 hover:-translate-y-0.5 transition-all duration-200 shadow-md hover:shadow-lg"
+               style="text-decoration:none;">
+                <i data-lucide="plus-circle" width="20" height="20" style="vertical-align:middle;"></i>
+                Nouveau trajet
+            </a>
         </div>
-    <?php endif; ?>
+
+        <?php if(isset($_GET['success']) && $_GET['success'] == 'trajet_publie'): ?>
+            <div id="publish-success-banner" style="background:#DCFCE7; color:#166534; padding:16px 20px; border-radius:12px; margin-bottom:32px; display:flex; align-items:center; gap:12px; box-shadow:0 8px 24px rgba(22,101,52,0.14);">
+                <i data-lucide="check-circle" width="24" height="24"></i>
+                <strong>Félicitations !</strong> Votre trajet a bien été publié.
+            </div>
+        <?php endif; ?>
 
     <!-- Statistiques : 4 cartes -->
     <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:20px; margin-bottom:40px;">
@@ -116,6 +118,20 @@
                         <span><i data-lucide="users" width="14" height="14" style="vertical-align:middle;"></i> <?= $trajet->places_disponibles ?> places restantes</span>
                         <span><i data-lucide="truck" width="14" height="14" style="vertical-align:middle;"></i> <?= htmlspecialchars($trajet->marque . ' ' . $trajet->modele) ?></span>
                     </div>
+
+                    <div style="margin-bottom:16px; border:1px solid #e5e7eb; border-radius:14px; overflow:hidden; background:#f8fafc;">
+                        <div style="padding:10px 12px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#64748b; display:flex; align-items:center; gap:6px; border-bottom:1px solid #e5e7eb; background:white;">
+                            <i data-lucide="route" width="14" height="14" style="color:#dc2626;"></i>
+                            Itinéraire du trajet
+                        </div>
+                        <div id="trip-map-<?= $trajet->id ?>"
+                             class="trip-mini-map"
+                             data-route-map="true"
+                             data-depart="<?= htmlspecialchars($trajet->point_depart ?: $trajet->ville_depart) ?>"
+                             data-arrivee="<?= htmlspecialchars($trajet->point_arrivee ?: $trajet->ville_arrivee) ?>"
+                             style="width:100%; height:180px; background:#0f172a;"></div>
+                    </div>
+
                     <form action="<?= BASE_URL ?>conducteur/trajet/<?= $trajet->id ?>/annuler" method="POST"
                           onsubmit="return confirm('Annuler ce trajet ? Cette action est irréversible.');">
                         <button type="submit"
@@ -143,7 +159,23 @@
         </div>
     <?php endif; ?>
 
+    </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const banner = document.getElementById('publish-success-banner');
+        if (banner) {
+            setTimeout(function () {
+                banner.style.transition = 'opacity 0.35s ease';
+                banner.style.opacity = '0';
+                setTimeout(function () {
+                    banner.style.display = 'none';
+                }, 350);
+            }, 4000);
+        }
+    });
+</script>
 
 <?php if(!empty($trajets)): ?>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -211,6 +243,39 @@
             if (bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40] });
         };
 
-        document.addEventListener('DOMContentLoaded', initConducteurMap);
+        const initMiniRouteMaps = async () => {
+            const containers = document.querySelectorAll('[data-route-map="true"]');
+            if (!containers.length || typeof L === 'undefined') return;
+
+            for (const container of containers) {
+                const depart = container.getAttribute('data-depart');
+                const arrivee = container.getAttribute('data-arrivee');
+                if (!depart || !arrivee) continue;
+
+                try {
+                    const map = L.map(container, { zoomControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, touchZoom: false, boxZoom: false });
+                    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
+
+                    const from = await geocode(`${depart}, Sénégal`);
+                    const to = await geocode(`${arrivee}, Sénégal`);
+                    const geo = await fetchRoute(from, to);
+                    const layer = L.geoJSON(geo, { style: { color: '#dc2626', weight: 4, opacity: 0.9 } }).addTo(map);
+                    const bounds = layer.getBounds();
+                    bounds.extend([from.lat, from.lon]);
+                    bounds.extend([to.lat, to.lon]);
+                    map.fitBounds(bounds, { padding: [12, 12] });
+
+                    L.marker([from.lat, from.lon], { icon: getMarkerIcon('#22c55e') }).addTo(map);
+                    L.marker([to.lat, to.lon], { icon: getMarkerIcon('#fb7185') }).addTo(map);
+                } catch (e) {
+                    container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#64748b;font-size:13px;">Carte indisponible</div>';
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initConducteurMap();
+            initMiniRouteMaps();
+        });
     </script>
 <?php endif; ?>

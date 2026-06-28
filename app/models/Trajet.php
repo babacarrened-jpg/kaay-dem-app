@@ -84,6 +84,10 @@ class Trajet {
         ];
     }
 
+    public static function getAllowedCities(): array {
+        return ['Dakar', 'Rufisque', 'Diamniadio'];
+    }
+
     private function normalizeText($value) {
         if($value === null) return '';
         $value = mb_strtolower((string)$value, 'UTF-8');
@@ -115,6 +119,8 @@ class Trajet {
      * Récupérer les trajets d'un conducteur
      */
     public function getByConducteur($conducteurId) {
+        $this->cloturerTrajetsPasses((int)$conducteurId);
+
         $this->db->query("SELECT t.*, u.nom as conducteur_nom, u.prenom as conducteur_prenom, v.marque, v.modele
                           FROM trajets t
                           JOIN utilisateurs u ON t.conducteur_id = u.id
@@ -155,6 +161,31 @@ class Trajet {
         $this->db->bind(':fumeur',             !empty($data['fumeur']) ? 1 : 0);
 
         return $this->db->execute();
+    }
+
+    /**
+     * Clôturer automatiquement les trajets déjà passés pour un conducteur.
+     */
+    public function cloturerTrajetsPasses(int $conducteurId): bool {
+        $this->db->query("SELECT id, date_trajet, heure_depart
+                          FROM trajets
+                          WHERE conducteur_id = :conducteur_id
+                            AND statut IN ('planifie', 'en_cours')");
+        $this->db->bind(':conducteur_id', $conducteurId);
+        $trajets = $this->db->resultSet();
+
+        $now = new DateTimeImmutable('now', new DateTimeZone('Africa/Dakar'));
+
+        foreach ($trajets as $trajet) {
+            $trajetDateTime = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $trajet->date_trajet . ' ' . $trajet->heure_depart);
+            if ($trajetDateTime instanceof DateTimeImmutable && $trajetDateTime <= $now) {
+                $this->db->query("UPDATE trajets SET statut = 'termine' WHERE id = :id");
+                $this->db->bind(':id', $trajet->id);
+                $this->db->execute();
+            }
+        }
+
+        return true;
     }
 
     /**

@@ -33,8 +33,12 @@ class ConducteurController extends Controller {
 
         $avisModel  = $this->model('Avis');
         $trajets    = $this->trajetModel->getByConducteur($_SESSION['user_id']);
-        $activeTrajets = array_values(array_filter($trajets, function ($trajet) {
-            return in_array($trajet->statut, ['planifie', 'en_cours'], true);
+        $now = new DateTimeImmutable('now', new DateTimeZone('Africa/Dakar'));
+
+        $activeTrajets = array_values(array_filter($trajets, function ($trajet) use ($now) {
+            $trajetDateTime = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $trajet->date_trajet . ' ' . $trajet->heure_depart);
+            $isFuture = $trajetDateTime instanceof DateTimeImmutable ? $trajetDateTime > $now : true;
+            return in_array($trajet->statut, ['planifie', 'en_cours'], true) && $isFuture;
         }));
 
         $pendingReservations = $this->reservationModel->getPendingByConducteur($_SESSION['user_id']);
@@ -220,10 +224,13 @@ class ConducteurController extends Controller {
         $heureDepart   = $postData['heure_depart'] ?? '';
         $placesTotales = max(1, (int)($postData['places_totales'] ?? 1));
         $prixParPlace  = (float)($postData['prix_par_place'] ?? 0);
+        $villeDepart   = trim((string)($postData['ville_depart'] ?? ''));
+        $villeArrivee  = trim((string)($postData['ville_arrivee'] ?? ''));
+        $allowedCities = Trajet::getAllowedCities();
 
         $errors = [];
-        if (empty($postData['ville_depart']))  { $errors[] = 'ville_depart'; }
-        if (empty($postData['ville_arrivee'])) { $errors[] = 'ville_arrivee'; }
+        if ($villeDepart === '' || !in_array($villeDepart, $allowedCities, true))  { $errors[] = 'ville_depart'; }
+        if ($villeArrivee === '' || !in_array($villeArrivee, $allowedCities, true)) { $errors[] = 'ville_arrivee'; }
         if ($dateTrajet === '')                { $errors[] = 'date_trajet'; }
         if ($heureDepart === '')               { $errors[] = 'heure_depart'; }
         if ($prixParPlace <= 0)                { $errors[] = 'prix_par_place'; }
@@ -237,9 +244,9 @@ class ConducteurController extends Controller {
         $trajetData = [
             'conducteur_id'  => $conducteurId,
             'vehicule_id'    => $vehicule->id,
-            'ville_depart'   => $postData['ville_depart'],
+            'ville_depart'   => $villeDepart,
             'point_depart'   => $postData['point_depart'] ?? '',
-            'ville_arrivee'  => $postData['ville_arrivee'],
+            'ville_arrivee'  => $villeArrivee,
             'point_arrivee'  => $postData['point_arrivee'] ?? '',
             'date_trajet'    => $dateTrajet,
             'heure_depart'   => $heureDepart,
