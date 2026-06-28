@@ -164,7 +164,7 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center justify-end gap-2">
-                                    <a href="<?= BASE_URL ?>admin/voirUtilisateur/<?= $u->id ?>" 
+                                    <a href="<?= BASE_URL ?>admin/utilisateur/<?= $u->id ?>" 
                                        class="p-2 rounded-lg bg-slate-50 text-slate-600 hover:bg-brand-600 hover:text-white transition-colors" 
                                        title="Voir le profil">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">

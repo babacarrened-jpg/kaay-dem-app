@@ -69,6 +69,7 @@ $router->post('/admin/validerConducteur/{id}', 'AdminController', 'validerConduc
 $router->post('/admin/refuserConducteur/{id}', 'AdminController', 'refuserConducteur');
 $router->get('/admin/utilisateurs', 'AdminController', 'utilisateurs');
 $router->get('/admin/utilisateur/{id}', 'AdminController', 'voirUtilisateur');
+$router->get('/admin/voirUtilisateur/{id}', 'AdminController', 'voirUtilisateur');
 $router->post('/admin/utilisateur/{id}/modifier', 'AdminController', 'modifierUtilisateur');
 $router->post('/admin/utilisateur/{id}/suspendre', 'AdminController', 'suspendreUtilisateur');
 $router->post('/admin/utilisateur/{id}/reactiver', 'AdminController', 'reactiverUtilisateur');
