@@ -6,8 +6,7 @@ class PassagerController extends Controller {
     private $trajetModel;
 
     public function __construct() {
-        // Vérifier si l'utilisateur est connecté
-        if(!isset($_SESSION['user_id'])) {
+        if (!isset($_SESSION['user_id'])) {
             $this->redirect('auth/connexion');
         }
 
@@ -19,7 +18,6 @@ class PassagerController extends Controller {
      * Affiche le dashboard du passager
      */
     public function dashboard() {
-        // Récupérer les réservations récentes du passager
         $reservations = $this->reservationModel->getByPassager($_SESSION['user_id']);
 
         $data = [
@@ -45,7 +43,7 @@ class PassagerController extends Controller {
     }
 
     /**
-     * Affiche les détails et le suivi d'une réservation
+     * Affiche les détails d'une réservation
      */
     public function reservation($id) {
         $reservation = $this->reservationModel->getDetailById((int)$id, $_SESSION['user_id']);
@@ -56,7 +54,10 @@ class PassagerController extends Controller {
 
         $statusMessage = '';
         $alertType = 'info';
-        $canCancel = in_array($reservation->statut, [ReservationStatus::EN_ATTENTE->value, ReservationStatus::CONFIRMEE->value], true);
+        $canCancel = in_array($reservation->statut, [
+            ReservationStatus::EN_ATTENTE->value,
+            ReservationStatus::CONFIRMEE->value
+        ], true);
 
         switch ($reservation->statut) {
             case ReservationStatus::CONFIRMEE->value:
@@ -68,11 +69,11 @@ class PassagerController extends Controller {
                 $alertType = 'warning';
                 break;
             case ReservationStatus::TERMINEE->value:
-                $statusMessage = 'Ce trajet est terminé. Merci d’avoir voyagé avec nous.';
+                $statusMessage = 'Ce trajet est terminé. Merci d\'avoir voyagé avec nous.';
                 $alertType = 'secondary';
                 break;
             case ReservationStatus::ANNULEE->value:
-                $statusMessage = 'Cette réservation a été annulée. Contactez le support pour plus d’informations.';
+                $statusMessage = 'Cette réservation a été annulée.';
                 $alertType = 'danger';
                 break;
             case 'refusee':
@@ -80,21 +81,24 @@ class PassagerController extends Controller {
                 $alertType = 'danger';
                 break;
             default:
-                $statusMessage = 'Statut de la réservation : ' . ucfirst(str_replace('_', ' ', $reservation->statut));
+                $statusMessage = 'Statut : ' . ucfirst(str_replace('_', ' ', $reservation->statut));
                 break;
         }
 
         $data = [
-            'titre' => 'Suivi de réservation',
-            'reservation' => $reservation,
+            'titre'         => 'Suivi de réservation',
+            'reservation'   => $reservation,
             'statusMessage' => $statusMessage,
-            'alertType' => $alertType,
-            'canCancel' => $canCancel
+            'alertType'     => $alertType,
+            'canCancel'     => $canCancel
         ];
 
         $this->render('passager/reservation', $data);
     }
 
+    /**
+     * Annuler une réservation (passager)
+     */
     public function annulerReservation($reservation_id) {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->redirect('passager/reservations');
@@ -111,88 +115,163 @@ class PassagerController extends Controller {
     }
 
     /**
-     * Traite une demande de réservation
+     * Réserver un trajet (GET = formulaire, POST = traitement)
      */
     public function reserverTrajet($trajet_id = null) {
-        if($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'GET') {
-            $trajet_id = $trajet_id ?? ($_POST['trajet_id'] ?? $_GET['trajet_id'] ?? null);
-            
-            // Récupérer infos du trajet
-            $trajet = $this->trajetModel->getById($trajet_id);
+        $trajet_id = $trajet_id ?? ($_POST['trajet_id'] ?? $_GET['trajet_id'] ?? null);
+        $trajet = $this->trajetModel->getById($trajet_id);
 
-            if(!$trajet) {
-                die("Trajet introuvable.");
+        if (!$trajet) {
+            $this->redirect('trajets/recherche?error=trajet_introuvable');
+        }
+
+        // Empêcher le conducteur de réserver son propre trajet
+        if ((int)$trajet->conducteur_id === (int)$_SESSION['user_id']) {
+            $this->redirect('trajets/detail/' . $trajet_id . '?error=proprio_trajet');
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            // Afficher le formulaire de confirmation
+            $data = [
+                'titre'  => 'Confirmer la réservation',
+                'trajet' => $trajet
+            ];
+            $this->render('passager/confirmer_reservation', $data);
+            return;
+        }
+
+        // POST : traiter la réservation
+        $places    = max(1, (int)($_POST['places'] ?? 1));
+        $prixTotal = $trajet->prix_par_place * $places;
+
+        try {
+            if ($this->reservationModel->reserver($trajet_id, $_SESSION['user_id'], $places, $prixTotal)) {
+                $this->redirect('passager/reservations?success=reservation_ok');
+            } else {
+                $this->redirect('trajets/detail/' . $trajet_id . '?error=reservation_echec');
             }
-
-            // Empêcher le conducteur de réserver son propre trajet
-            if($trajet->conducteur_id == $_SESSION['user_id']) {
-                die("Vous ne pouvez pas réserver votre propre trajet.");
-            }
-
-            $places = 1; // Par défaut, 1 place (à rendre dynamique plus tard)
-            $prix_total = $trajet->prix_par_place * $places;
-
-            // Lancer la réservation
-            try {
-                if($this->reservationModel->reserver($trajet_id, $_SESSION['user_id'], $places, $prix_total)) {
-                    $this->redirect('passager/dashboard?success=reservation_ok');
-                } else {
-                    $this->redirect('trajets/detail/' . $trajet_id . '?error=reservation_echec');
-                }
-            } catch (PlacesInsuffisantesException $e) {
-                $this->redirect('trajets/detail/' . $trajet_id . '?error=places_insuffisantes');
-            } catch (ReservationConflictException $e) {
-                $this->redirect('trajets/detail/' . $trajet_id . '?error=reservation_conflit');
-            }
-        } else {
-            $this->redirect('trajets/detail/' . $trajet_id);
+        } catch (PlacesInsuffisantesException $e) {
+            $this->redirect('trajets/detail/' . $trajet_id . '?error=places_insuffisantes');
+        } catch (ReservationConflictException $e) {
+            $this->redirect('trajets/detail/' . $trajet_id . '?error=reservation_conflit');
         }
     }
 
+    /**
+     * Formulaire devenir conducteur
+     */
     public function devenirConducteurForm() {
-    // Vérifier si déjà conducteur
-    if($_SESSION['user_role'] === 'conducteur' || $_SESSION['est_conducteur_valide']) {
-        $this->redirect('conducteur/dashboard');
+        if ($_SESSION['user_role'] === 'conducteur' || !empty($_SESSION['est_conducteur_valide'])) {
+            $this->redirect('conducteur/dashboard');
+        }
+
+        $data = ['titre' => 'Devenir Conducteur - Kaay Dem !'];
+        $this->render('passager/devenir_conducteur', $data);
     }
 
-    $data = ['titre' => 'Devenir Conducteur - Kaay Dem !'];
-    $this->render('passager/devenir_conducteur', $data);
+    /**
+     * Traitement demande devenir conducteur
+     */
+    public function devenirConducteur() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('passager/dashboard');
+        }
+
+        if (empty($_FILES['permis_recto']['name']) || empty($_FILES['permis_verso']['name'])) {
+            $this->redirect('passager/devenirConducteur?error=fichiers_manquants');
+        }
+
+        $uploadDir = '../public/assets/uploads/permis/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $rectoExt  = pathinfo($_FILES['permis_recto']['name'], PATHINFO_EXTENSION);
+        $rectoName = 'permis_' . $_SESSION['user_id'] . '_recto_' . time() . '.' . $rectoExt;
+        move_uploaded_file($_FILES['permis_recto']['tmp_name'], $uploadDir . $rectoName);
+
+        $versoExt  = pathinfo($_FILES['permis_verso']['name'], PATHINFO_EXTENSION);
+        $versoName = 'permis_' . $_SESSION['user_id'] . '_verso_' . time() . '.' . $versoExt;
+        move_uploaded_file($_FILES['permis_verso']['tmp_name'], $uploadDir . $versoName);
+
+        $userModel = $this->model('User');
+        $result    = $userModel->demanderConducteur((int)$_SESSION['user_id'], $rectoName, $versoName);
+
+        if ($result) {
+            $this->redirect('passager/dashboard?success=demande_envoyee');
+        } else {
+            $this->redirect('passager/devenirConducteur?error=demande_existante');
+        }
+    }
+
+    /**
+ * Formulaire pour laisser un avis
+ */
+public function laisserAvis($reservation_id) {
+    $reservation = $this->reservationModel->getDetailById((int)$reservation_id, $_SESSION['user_id']);
+
+    if (!$reservation) {
+        $this->redirect('passager/reservations?error=introuvable');
+    }
+
+    // Vérifications
+    if ($reservation->trajet_statut !== 'termine') {
+        $this->redirect('passager/reservations?error=trajet_non_termine');
+    }
+
+    $avisModel = $this->model('Avis');
+
+    if ($avisModel->dejaNote((int)$reservation->trajet_id, (int)$_SESSION['user_id'])) {
+        $this->redirect('passager/reservations?error=deja_note');
+    }
+
+    $data = [
+        'titre'       => 'Laisser un avis',
+        'reservation' => $reservation
+    ];
+
+    $this->render('passager/laisser_avis', $data);
 }
 
-public function devenirConducteur() {
-    if($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        $this->redirect('passager/dashboard');
+/**
+ * Traitement de l'avis soumis
+ */
+public function soumettreAvis($reservation_id) {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        $this->redirect('passager/reservations');
     }
 
-    // Vérifier les fichiers
-    if(empty($_FILES['permis_recto']['name']) || empty($_FILES['permis_verso']['name'])) {
-        $this->redirect('passager/devenirConducteur?error=fichiers_manquants');
+    $reservation = $this->reservationModel->getDetailById((int)$reservation_id, $_SESSION['user_id']);
+
+    if (!$reservation || $reservation->trajet_statut !== 'termine') {
+        $this->redirect('passager/reservations?error=impossible');
     }
 
-    // Dossier upload
-    $uploadDir = '../public/assets/uploads/permis/';
-    if(!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0755, true);
+    $avisModel = $this->model('Avis');
+
+    if ($avisModel->dejaNote((int)$reservation->trajet_id, (int)$_SESSION['user_id'])) {
+        $this->redirect('passager/reservations?error=deja_note');
     }
 
-    // Upload recto
-    $rectoExt = pathinfo($_FILES['permis_recto']['name'], PATHINFO_EXTENSION);
-    $rectoName = 'permis_' . $_SESSION['user_id'] . '_recto_' . time() . '.' . $rectoExt;
-    move_uploaded_file($_FILES['permis_recto']['tmp_name'], $uploadDir . $rectoName);
+    $note = (int)($_POST['note'] ?? 0);
+    $commentaire = trim($_POST['commentaire'] ?? '');
 
-    // Upload verso
-    $versoExt = pathinfo($_FILES['permis_verso']['name'], PATHINFO_EXTENSION);
-    $versoName = 'permis_' . $_SESSION['user_id'] . '_verso_' . time() . '.' . $versoExt;
-    move_uploaded_file($_FILES['permis_verso']['tmp_name'], $uploadDir . $versoName);
-
-    $userModel = $this->model('User');
-    $result = $userModel->demanderConducteur((int)$_SESSION['user_id'], $rectoName, $versoName);
-
-    if($result) {
-        $this->redirect('passager/dashboard?success=demande_envoyee');
-    } else {
-        $this->redirect('passager/devenirConducteur?error=demande_existante');
+    if ($note < 1 || $note > 5) {
+        $this->redirect('passager/reservation/' . $reservation_id . '/avis?error=note_invalide');
     }
+
+    $ok = $avisModel->addRating(
+        (int)$reservation->trajet_id,
+        (int)$_SESSION['user_id'],
+        (int)$reservation->conducteur_id,
+        $note,
+        $commentaire
+    );
+
+    if ($ok) {
+        $this->redirect('passager/reservations?success=avis_envoye');
+    }
+
+    $this->redirect('passager/reservations?error=avis_echec');
 }
-
 }
