@@ -87,19 +87,17 @@ class AuthController extends Controller {
 
                 // Inscription via le modèle
                 if($this->userModel->register($data)) {
-                    // Connexion automatique après inscription pour permettre la réservation immédiate
+                    // Connexion automatique après inscription
                     $newUser = $this->userModel->login($data['email'], $postData['mot_de_passe']);
                     if($newUser) {
                         $this->createUserSession($newUser);
                     }
 
-                    // Fallback : rediriger vers la page de connexion si l'auto-connexion échoue
                     $this->redirect('auth/connexion?success=inscrit');
                 } else {
                     die("Une erreur est survenue lors de l'inscription.");
                 }
             } else {
-                // Recharger la vue avec erreurs
                 $this->render('auth/inscription', $data);
             }
 
@@ -165,6 +163,94 @@ class AuthController extends Controller {
     }
 
     /**
+     * Page : Demande de réinitialisation de mot de passe oublié
+     */
+    public function motDePasseOublie() {
+        $data = [
+            'titre' => 'Mot de passe oublié - Kaay Dem !',
+            'message' => '',
+            'alertType' => ''
+        ];
+
+        if ($_SERVER["REQUEST_METHOD"] == "POST") {
+            $postData = $this->getPostData();
+            $email = trim($postData['email']);
+            
+            if (!empty($email)) {
+                // Génération des données de sécurité
+                $token = bin2hex(random_bytes(32)); 
+                $expire_at = date("Y-m-d H:i:s", strtotime("+15 minutes"));
+                
+                // Enregistrement via le modèle
+                $this->userModel->savePasswordResetToken($email, $token, $expire_at);
+                
+                // Construction du lien
+                $lien = BASE_URL . "auth/reinitialiser-mot-de-passe?token=" . $token;
+                
+                // Envoi de l'email
+                $sujet = "Réinitialisation de votre mot de passe - KAAY DEMM";
+                $contenu = "Bonjour,\n\nPour changer votre mot de passe, cliquez sur ce lien (valide 15 min) : \n" . $lien;
+                $headers = "From: no-reply@kaaydemm.sn";
+                @mail($email, $sujet, $contenu, $headers);
+                
+                // Message sécurisé standardisé
+                $data['message'] = "Si cet email correspond à un compte, un lien de réinitialisation vous a été envoyé.";
+                $data['alertType'] = "success";
+            }
+        }
+
+        $this->render('auth/mot-de-passe-oublie', $data);
+    }
+
+    /**
+     * Page : Définition du nouveau mot de passe via le Token reçu
+     */
+    public function reinitialiserMotDePasse() {
+        $data = [
+            'titre' => 'Nouveau mot de passe - Kaay Dem !',
+            'message' => '',
+            'error' => false,
+            'success' => false,
+            'token' => isset($_GET['token']) ? trim($_GET['token']) : ''
+        ];
+
+        // Vérification immédiate du jeton d'accès
+        if (empty($data['token'])) {
+            $data['message'] = "Le jeton d'accès est manquant.";
+            $data['error'] = true;
+        } else {
+            $resetRequest = $this->userModel->checkResetToken($data['token']);
+
+            if (!$resetRequest) {
+                $data['message'] = "Le lien est invalide ou a expiré. Veuillez refaire une demande.";
+                $data['error'] = true;
+            }
+        }
+
+        // Traitement de la modification effective
+        if ($_SERVER["REQUEST_METHOD"] == "POST" && !$data['error']) {
+            $postData = $this->getPostData();
+            $nouveau_mdp = $postData['mot_de_passe'];
+            $confirmation = $postData['confirmation_mot_de_passe'];
+
+            if ($nouveau_mdp !== $confirmation) {
+                $data['message'] = "Les mots de passe ne correspondent pas.";
+            } elseif (strlen($nouveau_mdp) < 6) {
+                $data['message'] = "Le mot de passe doit faire au moins 6 caractères.";
+            } else {
+                // Application sécurisée du changement
+                $mdp_hache = password_hash($nouveau_mdp, PASSWORD_DEFAULT);
+                $this->userModel->updatePasswordAndClearTokens($resetRequest->email, $mdp_hache);
+
+                $data['message'] = "Votre mot de passe a été modifié avec succès !";
+                $data['success'] = true;
+            }
+        }
+
+        $this->render('auth/reinitialiser-mot-de-passe', $data);
+    }
+
+    /**
      * Crée la session utilisateur
      */
     public function createUserSession($user) {
@@ -175,7 +261,6 @@ class AuthController extends Controller {
         $_SESSION['user_role'] = $user->role;
         $_SESSION['est_conducteur_valide'] = $user->est_conducteur_valide;
 
-        // Permettre à un utilisateur validé conducteur de conserver aussi le rôle passager
         $roles = [$user->role];
         if($user->role !== 'admin') {
             if($user->role !== 'conducteur') {
@@ -188,7 +273,6 @@ class AuthController extends Controller {
 
         $_SESSION['user_roles'] = array_values(array_unique($roles));
 
-        // Redirection selon le rôle principal
         if($user->role == 'admin') {
             $this->redirect('admin/dashboard');
         } elseif($user->role == 'conducteur' || $user->est_conducteur_valide) {

@@ -1,9 +1,4 @@
 <?php
-
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
-// ... le reste du code existant
 // public/index.php (Front Controller)
 
 // Démarrage de la session
@@ -34,6 +29,12 @@ $router->get('/auth/inscription', 'AuthController', 'registerForm');
 $router->post('/auth/inscription', 'AuthController', 'register');
 $router->get('/auth/deconnexion', 'AuthController', 'logout');
 
+// --- Nouvelles Routes : Mot de passe oublié ---
+$router->get('/auth/mot-de-passe-oublie', 'AuthController', 'motDePasseOublie');
+$router->post('/auth/mot-de-passe-oublie', 'AuthController', 'motDePasseOublie');
+$router->get('/auth/reinitialiser-mot-de-passe', 'AuthController', 'reinitialiserMotDePasse');
+$router->post('/auth/reinitialiser-mot-de-passe', 'AuthController', 'reinitialiserMotDePasse');
+
 // --- Trajets (Recherche & Détails) ---
 $router->get('/trajets/recherche', 'TrajetController', 'searchForm');
 $router->get('/trajets/resultats', 'TrajetController', 'searchResults');
@@ -45,6 +46,8 @@ $router->get('/passager/reservations', 'PassagerController', 'reservations');
 $router->get('/passager/reservation/{id}', 'PassagerController', 'reservation');
 $router->get('/passager/reserver/{trajet_id}', 'PassagerController', 'reserverTrajet');
 $router->post('/passager/reserver/{trajet_id}', 'PassagerController', 'reserverTrajet');
+$router->get('/passager/devenirConducteur', 'PassagerController', 'devenirConducteurForm');
+$router->post('/passager/devenirConducteur', 'PassagerController', 'devenirConducteur');
 
 // --- Conducteur ---
 $router->get('/conducteur/dashboard', 'ConducteurController', 'dashboard');
@@ -69,10 +72,6 @@ $router->get('/admin/dashboard', 'AdminController', 'dashboard');
 $router->get('/admin/trajets', 'AdminController', 'trajets');
 $router->post('/admin/validerConducteur/{id}', 'AdminController', 'validerConducteur');
 $router->post('/admin/refuserConducteur/{id}', 'AdminController', 'refuserConducteur');
-
-// Dans la section --- Passager ---
-$router->get('/passager/devenirConducteur', 'PassagerController', 'devenirConducteurForm');
-$router->post('/passager/devenirConducteur', 'PassagerController', 'devenirConducteur');
 
 
 // ============================================
