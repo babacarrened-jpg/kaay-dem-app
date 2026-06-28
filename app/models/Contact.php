@@ -1,5 +1,6 @@
 <?php
 // app/models/Contact.php
+opcache_reset();
 
 class Contact {
     private $db;
@@ -42,6 +43,15 @@ class Contact {
         $this->db->query('SELECT COUNT(*) AS total FROM messages_contact WHERE lu = FALSE');
         $result = $this->db->single();
         return (int) ($result->total ?? 0);
+    }
+
+    /**
+     * Récupère les N derniers messages (pour le flux d'activité)
+     */
+    public function getDerniers(int $limit = 5): array {
+        $this->db->query('SELECT * FROM messages_contact ORDER BY date_envoi DESC LIMIT :limit');
+        $this->db->bind(':limit', $limit);
+        return $this->db->resultSet();
     }
 
     /**
