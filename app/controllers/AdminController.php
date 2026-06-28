@@ -24,25 +24,104 @@ class AdminController extends Controller {
      * Affiche le dashboard d'administration
      */
     public function dashboard() {
+
         $demandes = $this->userModel->getPendingConducteurRequests();
         $allTrajets = $this->trajetModel->getAll();
 
-        // --- Nouvelles statistiques ---
-        $trajetsByMonth    = $this->trajetModel->getTrajetsByMonth();
-        $tauxOccupation    = $this->trajetModel->getTauxOccupationByMonth();
-        $topConducteurs    = $this->trajetModel->getTopConducteurs(5);
+        // Récupération des statistiques
+        $trajetsByMonth = $this->trajetModel->getTrajetsByMonth();
+        $tauxOccupation = $this->trajetModel->getTauxOccupationByMonth();
+        $topConducteurs = $this->trajetModel->getTopConducteurs(5);
+
+        // Tous les mois de l'année
+        $mois = [
+            'Janvier',
+            'Février',
+            'Mars',
+            'Avril',
+            'Mai',
+            'Juin',
+            'Juillet',
+            'Août',
+            'Septembre',
+            'Octobre',
+            'Novembre',
+            'Décembre'
+        ];
+
+        /*
+        |--------------------------------------------------------------------------
+        | Trajets par mois
+        |--------------------------------------------------------------------------
+        */
+
+        $trajetsComplets = [];
+
+        foreach ($mois as $m) {
+
+            $nb = 0;
+
+            foreach ($trajetsByMonth as $t) {
+
+                if ($t->mois_label === $m) {
+                    $nb = (int)$t->total;
+                    break;
+                }
+            }
+
+            $trajetsComplets[] = (object)[
+                'mois_label' => $m,
+                'total' => $nb
+            ];
+        }
+
+        $trajetsByMonth = $trajetsComplets;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Taux d'occupation
+        |--------------------------------------------------------------------------
+        */
+
+        $occupationComplete = [];
+
+        foreach ($mois as $m) {
+
+            $taux = 0;
+
+            foreach ($tauxOccupation as $o) {
+
+                if ($o->mois_label === $m) {
+                    $taux = (float)$o->taux_occupation;
+                    break;
+                }
+            }
+
+            $occupationComplete[] = (object)[
+                'mois_label' => $m,
+                'taux_occupation' => $taux
+            ];
+        }
+
+        $tauxOccupation = $occupationComplete;
 
         $data = [
+
             'titre' => 'Administration - Kaay Dem !',
+
             'stats' => [
                 'utilisateurs'   => count($this->userModel->findAll()),
                 'trajets_actifs' => count($allTrajets),
                 'signalements'   => 0
             ],
-            'demandes_conducteur'  => $demandes,
-            'trajets_by_month'     => $trajetsByMonth,
-            'taux_occupation'      => $tauxOccupation,
-            'top_conducteurs'      => $topConducteurs,
+
+            'demandes_conducteur' => $demandes,
+
+            'trajets_by_month' => $trajetsByMonth,
+
+            'taux_occupation' => $tauxOccupation,
+
+            'top_conducteurs' => $topConducteurs,
         ];
 
         $this->render('admin/dashboard', $data);

@@ -237,41 +237,57 @@ class Trajet {
      * Nombre de trajets créés par mois (12 derniers mois)
      */
     public function getTrajetsByMonth(): array {
-        $this->db->query(
-            "SELECT
-                DATE_FORMAT(date_creation, '%Y-%m') AS mois,
-                DATE_FORMAT(date_creation, '%b %Y')  AS mois_label,
+
+        $this->db->query("
+            SELECT
+                MONTH(date_creation) AS mois,
+                ELT(
+                    MONTH(date_creation),
+                    'Jan','Fév','Mar','Avr','Mai','Juin',
+                    'Juil','Août','Sep','Oct','Nov','Déc'
+                ) AS mois_label,
                 COUNT(*) AS total
-             FROM trajets
-             WHERE date_creation >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
-             GROUP BY mois, mois_label
-             ORDER BY mois ASC"
-        );
+            FROM trajets
+            WHERE YEAR(date_creation)=YEAR(CURDATE())
+            GROUP BY MONTH(date_creation)
+            ORDER BY MONTH(date_creation)
+        ");
+
         return $this->db->resultSet();
     }
-
     /**
      * Taux d'occupation moyen par mois (places réservées / places totales)
      * Basé sur les trajets ayant au moins une réservation confirmée
      */
     public function getTauxOccupationByMonth(): array {
-        $this->db->query(
-            "SELECT
-                DATE_FORMAT(t.date_creation, '%Y-%m') AS mois,
-                DATE_FORMAT(t.date_creation, '%b %Y')  AS mois_label,
+
+        $this->db->query("
+            SELECT
+                MONTH(date_creation) AS mois,
+                ELT(
+                    MONTH(date_creation),
+                    'Jan','Fév','Mar','Avr','Mai','Juin',
+                    'Juil','Août','Sep','Oct','Nov','Déc'
+                ) AS mois_label,
+
                 ROUND(
-                    SUM(t.places_totales - t.places_disponibles) /
-                    NULLIF(SUM(t.places_totales), 0) * 100
-                , 1) AS taux_occupation
-             FROM trajets t
-             WHERE t.date_creation >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
-               AND t.statut IN ('termine','en_cours','planifie')
-             GROUP BY mois, mois_label
-             ORDER BY mois ASC"
-        );
+                    SUM(places_totales-places_disponibles)
+                    /
+                    NULLIF(SUM(places_totales),0)
+                    *100,
+                1) AS taux_occupation
+
+            FROM trajets
+
+            WHERE YEAR(date_creation)=YEAR(CURDATE())
+
+            GROUP BY MONTH(date_creation)
+
+            ORDER BY MONTH(date_creation)
+        ");
+
         return $this->db->resultSet();
     }
-
     /**
      * Top conducteurs : classement par nombre de trajets effectués
      */

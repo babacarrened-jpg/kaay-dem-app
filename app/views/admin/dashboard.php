@@ -298,71 +298,85 @@
 
         <!-- Trajets par mois -->
         <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-            <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center">
-                <div>
-                    <h2 class="font-display text-base font-bold text-slate-900">Trajets par mois</h2>
-                    <p class="text-xs text-slate-500 mt-0.5">12 derniers mois</p>
-                </div>
-                <?php if(!empty($trajets_by_month)): ?>
-                <span class="text-xs font-semibold bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full">
-                    Moy. <?= !empty($stats_globales) ? $stats_globales->moyenne_mensuelle : '—' ?>/mois
-                </span>
-                <?php endif; ?>
+            <div class="px-6 py-5 border-b border-slate-100">
+                <h2 class="font-display text-base font-bold text-slate-900">
+                    Trajets par mois
+                </h2>
+                <p class="text-xs text-slate-500 mt-1">
+                    Nombre de trajets publiés chaque mois
+                </p>
             </div>
+
             <div class="p-6">
                 <?php if(empty($trajets_by_month)): ?>
-                    <p class="text-slate-400 text-sm text-center py-8">Aucune donnée.</p>
+
+                    <p class="text-center text-slate-400 py-10">
+                        Aucune donnée disponible.
+                    </p>
+
                 <?php else: ?>
-                <div style="position:relative;height:220px;">
-                    <canvas id="chartTrajetsMois"></canvas>
-                </div>
-                <script>
-                (function(){
-                    const labels = <?= json_encode(array_map(fn($r) => $r->mois_label, $trajets_by_month)) ?>;
-                    const values = <?= json_encode(array_map(fn($r) => (int)$r->total, $trajets_by_month)) ?>;
-                    const avg    = <?= !empty($stats_globales) ? (float)$stats_globales->moyenne_mensuelle : 0 ?>;
-                    new Chart(document.getElementById('chartTrajetsMois'), {
-                        type: 'bar',
-                        data: {
-                            labels,
-                            datasets: [
-                                {
-                                    label: 'Trajets',
-                                    data: values,
-                                    backgroundColor: values.map(v => v === Math.max(...values) ? 'rgba(99,102,241,0.9)' : 'rgba(99,102,241,0.25)'),
-                                    borderColor: 'rgba(99,102,241,1)',
-                                    borderWidth: 1.5,
-                                    borderRadius: 6,
-                                    borderSkipped: false,
+
+                    <div style="height:260px">
+                        <canvas id="chartTrajetsMois"></canvas>
+                    </div>
+
+                    <script>
+                    (() => {
+
+                        const labels = <?= json_encode(array_map(fn($r)=>$r->mois_label,$trajets_by_month)) ?>;
+
+                        const values = <?= json_encode(array_map(fn($r)=>(int)$r->total,$trajets_by_month)) ?>;
+
+                        new Chart(document.getElementById("chartTrajetsMois"),{
+
+                            type:"bar",
+
+                            data:{
+                                labels:labels,
+                                datasets:[{
+                                    label:"Trajets",
+                                    data:values,
+                                    backgroundColor:"#4F46E5",
+                                    borderRadius:8,
+                                    barThickness:35
+                                }]
+                            },
+
+                            options:{
+                                responsive:true,
+                                maintainAspectRatio:false,
+
+                                plugins:{
+                                    legend:{
+                                        display:false
+                                    }
                                 },
-                                {
-                                    label: 'Moyenne',
-                                    data: labels.map(() => avg),
-                                    type: 'line',
-                                    borderColor: 'rgba(239,68,68,0.7)',
-                                    borderWidth: 2,
-                                    borderDash: [6,4],
-                                    pointRadius: 0,
-                                    fill: false,
+
+                                scales:{
+                                    x:{
+                                        grid:{
+                                            display:false
+                                        }
+                                    },
+                                    y:{
+                                        beginAtZero:true,
+                                        ticks:{
+                                            stepSize:1
+                                        }
+                                    }
                                 }
-                            ]
-                        },
-                        options: {
-                            responsive: true, maintainAspectRatio: false,
-                            plugins: { legend: { display: true, position: 'bottom', labels: { font: { size: 11 } } } },
-                            scales: {
-                                x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-                                y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.04)' } }
                             }
-                        }
-                    });
-                })();
-                </script>
+
+                        });
+
+                    })();
+                    </script>
+
                 <?php endif; ?>
             </div>
         </div>
 
-        <!-- Revenu par mois -->
+    <!-- Revenu par mois -->
         <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
             <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center">
                 <div>
@@ -418,65 +432,95 @@
             </div>
         </div>
 
-        <!-- Taux d'occupation -->
-        <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-            <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center">
-                <div>
-                    <h2 class="font-display text-base font-bold text-slate-900">Taux d'occupation</h2>
-                    <p class="text-xs text-slate-500 mt-0.5">% des places occupées / mois</p>
-                </div>
-                <?php if(!empty($stats_globales)): ?>
-                <span class="text-xs font-semibold bg-purple-50 text-purple-600 px-3 py-1 rounded-full">
-                    Global : <?= $stats_globales->taux_occupation_global ?? 0 ?>%
-                </span>
-                <?php endif; ?>
-            </div>
-            <div class="p-6">
-                <?php if(empty($taux_occupation)): ?>
-                    <p class="text-slate-400 text-sm text-center py-8">Aucune donnée.</p>
-                <?php else: ?>
-                <div style="position:relative;height:220px;">
-                    <canvas id="chartTauxOccupation"></canvas>
-                </div>
-                <script>
-                (function(){
-                    const labels = <?= json_encode(array_map(fn($r) => $r->mois_label, $taux_occupation)) ?>;
-                    const values = <?= json_encode(array_map(fn($r) => (float)$r->taux_occupation, $taux_occupation)) ?>;
-                    new Chart(document.getElementById('chartTauxOccupation'), {
-                        type: 'bar',
-                        data: {
-                            labels,
-                            datasets: [{
-                                label: "Taux d'occupation (%)",
-                                data: values,
-                                backgroundColor: values.map(v => v >= 75 ? 'rgba(34,197,94,0.8)' : v >= 40 ? 'rgba(250,204,21,0.8)' : 'rgba(239,68,68,0.7)'),
-                                borderRadius: 6,
-                                borderSkipped: false,
-                            }]
-                        },
-                        options: {
-                            responsive: true, maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.y + '%' } }
-                            },
-                            scales: {
-                                x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-                                y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%', font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.04)' } }
-                            }
-                        }
-                    });
-                })();
-                </script>
-                <div class="flex gap-4 mt-3 text-xs text-slate-400">
-                    <span><span class="inline-block w-2 h-2 rounded-full bg-green-500 mr-1"></span>≥ 75%</span>
-                    <span><span class="inline-block w-2 h-2 rounded-full bg-yellow-400 mr-1"></span>40–74%</span>
-                    <span><span class="inline-block w-2 h-2 rounded-full bg-red-400 mr-1"></span>&lt; 40%</span>
-                </div>
-                <?php endif; ?>
-            </div>
-        </div>
+                <!-- Taux d'occupation -->
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
 
+            <div class="px-6 py-5 border-b border-slate-100">
+                <h2 class="font-display text-base font-bold text-slate-900">
+                    Taux d'occupation
+                </h2>
+                <p class="text-xs text-slate-500 mt-1">
+                    Pourcentage moyen des places occupées par mois
+                </p>
+            </div>
+
+            <div class="p-6">
+
+                <?php if(empty($taux_occupation)): ?>
+
+                    <p class="text-center text-slate-400 py-10">
+                        Aucune donnée disponible.
+                    </p>
+
+                <?php else: ?>
+
+                    <div style="height:260px">
+                        <canvas id="chartTauxOccupation"></canvas>
+                    </div>
+
+                    <script>
+                    (() => {
+
+                        const labels = <?= json_encode(array_map(fn($r)=>$r->mois_label,$taux_occupation)) ?>;
+
+                        const values = <?= json_encode(array_map(fn($r)=>(float)$r->taux_occupation,$taux_occupation)) ?>;
+
+                        new Chart(document.getElementById("chartTauxOccupation"),{
+
+                            type:"bar",
+
+                            data:{
+                                labels:labels,
+                                datasets:[{
+                                    label:"Taux d'occupation",
+                                    data:values,
+                                    backgroundColor:"#10B981",
+                                    borderRadius:8,
+                                    barThickness:35
+                                }]
+                            },
+
+                            options:{
+                                responsive:true,
+                                maintainAspectRatio:false,
+
+                                plugins:{
+                                    legend:{
+                                        display:false
+                                    },
+                                    tooltip:{
+                                        callbacks:{
+                                            label:(ctx)=>ctx.parsed.y+" %"
+                                        }
+                                    }
+                                },
+
+                                scales:{
+                                    x:{
+                                        grid:{
+                                            display:false
+                                        }
+                                    },
+                                    y:{
+                                        beginAtZero:true,
+                                        max:100,
+                                        ticks:{
+                                            callback:(value)=>value+"%"
+                                        }
+                                    }
+                                }
+                            }
+
+                        });
+
+                    })();
+                    </script>
+
+                <?php endif; ?>
+
+            </div>
+
+        </div>
         <!-- Top Conducteurs -->
         <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
             <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center">
@@ -546,103 +590,135 @@
     </div>
  
     <!-- ========== STATISTIQUES : TOP CONDUCTEURS ========== -->
-    <section class="mb-10">
+        <section class="mb-10">
         <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+
             <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center">
                 <div>
-                    <h2 class="font-display text-xl font-bold text-slate-900">Top Conducteurs</h2>
-                    <p class="text-sm text-slate-500 mt-1">Classement par nombre total de trajets publiés</p>
+                    <h2 class="font-display text-xl font-bold text-slate-900">
+                        🏆 Top Conducteurs
+                    </h2>
+
+                    <p class="text-sm text-slate-500 mt-1">
+                        Classement par nombre total de trajets publiés
+                    </p>
                 </div>
-                <span class="text-xs font-semibold bg-brand-50 text-brand-600 px-3 py-1.5 rounded-full">5 meilleurs</span>
+
+                <span class="bg-brand-50 text-brand-600 text-xs font-bold px-3 py-1 rounded-full">
+                    TOP <?= count($top_conducteurs) ?>
+                </span>
             </div>
-            <div class="px-8 py-6">
-                <?php if(empty($top_conducteurs)): ?>
-                    <p class="text-slate-400 text-sm text-center py-8">Aucun conducteur actif pour le moment.</p>
-                <?php else: ?>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                    <!-- Graphique barres horizontales -->
-                    <div style="position:relative; height:<?= count($top_conducteurs) * 55 ?>px;">
-                        <canvas id="chartTopConducteurs"></canvas>
-                    </div>
-                    <script>
-                    (function() {
-                        const labels = <?= json_encode(array_map(fn($c) => $c->conducteur, $top_conducteurs)) ?>;
-                        const values = <?= json_encode(array_map(fn($c) => (int)$c->nb_trajets, $top_conducteurs)) ?>;
-                        const colors = ['rgba(234,179,8,0.85)','rgba(148,163,184,0.85)','rgba(180,83,9,0.85)','rgba(99,102,241,0.7)','rgba(99,102,241,0.5)'];
-                        new Chart(document.getElementById('chartTopConducteurs'), {
-                            type: 'bar',
-                            data: {
-                                labels,
-                                datasets: [{
-                                    label: 'Trajets',
-                                    data: values,
-                                    backgroundColor: colors.slice(0, labels.length),
-                                    borderRadius: 8,
-                                    borderSkipped: false,
-                                }]
-                            },
-                            options: {
-                                indexAxis: 'y',
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: { display: false },
-                                    tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.x} trajet(s)` } }
-                                },
-                                scales: {
-                                    x: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: 'rgba(0,0,0,0.05)' } },
-                                    y: { grid: { display: false }, ticks: { font: { size: 13, weight: '600' } } }
-                                }
-                            }
-                        });
-                    })();
-                    </script>
-                    <!-- Tableau détail -->
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="border-b border-slate-100">
-                                    <th class="pb-3 text-xs text-slate-400 uppercase tracking-wider w-8">#</th>
-                                    <th class="pb-3 text-xs text-slate-400 uppercase tracking-wider">Conducteur</th>
-                                    <th class="pb-3 text-xs text-slate-400 uppercase tracking-wider text-center">Trajets</th>
-                                    <th class="pb-3 text-xs text-slate-400 uppercase tracking-wider text-center">Passagers</th>
-                                    <th class="pb-3 text-xs text-slate-400 uppercase tracking-wider text-center">Note</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-50">
-                                <?php foreach($top_conducteurs as $i => $c): ?>
-                                <tr class="hover:bg-slate-50 transition-colors">
-                                    <td class="py-3 text-lg">
-                                        <?php if($i===0): ?>🥇<?php elseif($i===1): ?>🥈<?php elseif($i===2): ?>🥉<?php else: ?><span class="text-slate-400 font-semibold text-sm"><?= $i+1 ?></span><?php endif; ?>
-                                    </td>
-                                    <td class="py-3">
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-8 h-8 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-sm shrink-0">
-                                                <?= mb_substr($c->conducteur, 0, 1, 'UTF-8') ?>
-                                            </div>
-                                            <span class="font-semibold text-slate-900 text-sm"><?= htmlspecialchars($c->conducteur) ?></span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3 text-center font-bold text-brand-600"><?= (int)$c->nb_trajets ?></td>
-                                    <td class="py-3 text-center text-slate-600 font-semibold text-sm"><?= (int)($c->passagers_transportes ?? 0) ?></td>
-                                    <td class="py-3 text-center">
-                                        <?php if($c->note_moyenne): ?>
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-yellow-50 text-yellow-700 text-xs font-bold">
-                                            ⭐ <?= number_format((float)$c->note_moyenne, 1) ?>
-                                        </span>
-                                        <?php else: ?><span class="text-slate-300 text-xs">—</span><?php endif; ?>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
+
+            <?php if(empty($top_conducteurs)): ?>
+
+                <div class="p-10 text-center text-slate-400">
+                    Aucun conducteur disponible.
                 </div>
-                <?php endif; ?>
+
+            <?php else: ?>
+
+            <div class="divide-y divide-slate-100">
+
+            <?php
+            $max = max(array_map(fn($c)=>$c->nb_trajets,$top_conducteurs));
+
+            foreach($top_conducteurs as $i=>$c):
+
+                $percent = ($c->nb_trajets/$max)*100;
+
+                switch($i){
+
+                    case 0:
+                        $badge="🥇";
+                        $color="bg-yellow-400";
+                        break;
+
+                    case 1:
+                        $badge="🥈";
+                        $color="bg-slate-400";
+                        break;
+
+                    case 2:
+                        $badge="🥉";
+                        $color="bg-orange-400";
+                        break;
+
+                    default:
+                        $badge="#".($i+1);
+                        $color="bg-brand-500";
+                }
+
+            ?>
+
+            <div class="p-6 hover:bg-slate-50 transition">
+
+                <div class="flex justify-between items-center">
+
+                    <div class="flex items-center gap-4">
+
+                        <div class="w-12 h-12 rounded-full <?= $color ?> text-white flex items-center justify-center font-bold">
+                            <?= $badge ?>
+                        </div>
+
+                        <div>
+
+                            <div class="font-semibold text-slate-900">
+                                <?= htmlspecialchars($c->conducteur) ?>
+                            </div>
+
+                            <div class="text-xs text-slate-500 mt-1">
+
+                                <?= (int)$c->passagers_transportes ?> passagers
+
+                                <?php if($c->note_moyenne): ?>
+
+                                    • ⭐ <?= number_format($c->note_moyenne,1) ?>
+
+                                <?php endif; ?>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="text-right">
+
+                        <div class="text-2xl font-bold text-brand-600">
+                            <?= $c->nb_trajets ?>
+                        </div>
+
+                        <div class="text-xs text-slate-400">
+                            trajets
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="mt-4">
+
+                    <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+
+                        <div
+                            class="h-full bg-brand-600 rounded-full"
+                            style="width:<?= $percent ?>%">
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
+
+            <?php endforeach; ?>
+
+            </div>
+
+            <?php endif; ?>
+
         </div>
     </section>
-
     <!-- Contenu Principal -->
     <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         

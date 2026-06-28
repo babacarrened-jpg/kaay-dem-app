@@ -78,6 +78,42 @@ class User implements RepositoryInterface {
         return $row;
     }
 
+    /**
+     * Enregistre un jeton de réinitialisation de mot de passe
+     */
+    public function savePasswordResetToken($email, $token, $expireAt) {
+        $this->db->query('INSERT INTO password_resets (email, token, expire_at) VALUES (:email, :token, :expire_at)');
+        $this->db->bind(':email', $email);
+        $this->db->bind(':token', $token);
+        $this->db->bind(':expire_at', $expireAt);
+        return $this->db->execute();
+    }
+
+    /**
+     * Vérifie si un jeton est valide et non expiré
+     */
+    public function checkResetToken($token) {
+        $this->db->query('SELECT * FROM password_resets WHERE token = :token AND expire_at > NOW() ORDER BY id DESC LIMIT 1');
+        $this->db->bind(':token', $token);
+        return $this->db->single();
+    }
+
+    /**
+     * Met à jour le mot de passe d'un utilisateur et nettoie les jetons obsolètes
+     */
+    public function updatePasswordAndClearTokens($email, $hashedPassword) {
+        // 1. Update du mot de passe dans la table utilisateurs
+        $this->db->query('UPDATE utilisateurs SET mot_de_passe = :mot_de_passe WHERE email = :email');
+        $this->db->bind(':mot_de_passe', $hashedPassword);
+        $this->db->bind(':email', $email);
+        $this->db->execute();
+
+        // 2. Nettoyage de la table des tokens
+        $this->db->query('DELETE FROM password_resets WHERE email = :email');
+        $this->db->bind(':email', $email);
+        return $this->db->execute();
+    }
+
     public function getPendingConducteurRequests(): array {
         $this->db->query('SELECT d.id, d.utilisateur_id, d.statut, d.date_demande, u.nom as utilisateur_nom, u.prenom as utilisateur_prenom FROM demandes_conducteur d JOIN utilisateurs u ON d.utilisateur_id = u.id WHERE d.statut = :statut ORDER BY d.date_demande DESC');
         $this->db->bind(':statut', 'en_attente');
@@ -182,22 +218,17 @@ class User implements RepositoryInterface {
         return $this->db->execute();
     }
 
-
     public function demanderConducteur(int $userId, string $permisRecto, string $permisVerso): bool {
-    // Vérifier si une demande en attente existe déjà
-    $this->db->query('SELECT id FROM demandes_conducteur 
-                      WHERE utilisateur_id = :user_id AND statut = "en_attente"');
-    $this->db->bind(':user_id', $userId);
-    $this->db->single();
-    if($this->db->rowCount() > 0) return false;
+        // Vérifier si une demande en attente existe déjà
+        $this->db->query('SELECT id FROM demandes_conducteur WHERE utilisateur_id = :user_id AND statut = "en_attente"');
+        $this->db->bind(':user_id', $userId);
+        $this->db->single();
+        if($this->db->rowCount() > 0) return false;
 
-    $this->db->query('INSERT INTO demandes_conducteur 
-                      (utilisateur_id, permis_recto, permis_verso, statut, date_demande) 
-                      VALUES (:user_id, :recto, :verso, "en_attente", NOW())');
-    $this->db->bind(':user_id', $userId);
-    $this->db->bind(':recto', $permisRecto);
-    $this->db->bind(':verso', $permisVerso);
-    return $this->db->execute();
-}
-    
+        $this->db->query('INSERT INTO demandes_conducteur (utilisateur_id, permis_recto, permis_verso, statut, date_demande) VALUES (:user_id, :recto, :verso, "en_attente", NOW())');
+        $this->db->bind(':user_id', $userId);
+        $this->db->bind(':recto', $permisRecto);
+        $this->db->bind(':verso', $permisVerso);
+        return $this->db->execute();
+    }
 }
