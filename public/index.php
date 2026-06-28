@@ -81,6 +81,16 @@ $router->post('/admin/utilisateur/{id}/suspendre', 'AdminController', 'suspendre
 $router->post('/admin/utilisateur/{id}/reactiver', 'AdminController', 'reactiverUtilisateur');
 $router->post('/admin/utilisateur/{id}/supprimer', 'AdminController', 'supprimerUtilisateur');
 
+// --- Passager complémentaires ---
+$router->get('/passager/devenirConducteur', 'PassagerController', 'devenirConducteurForm');
+$router->post('/passager/devenirConducteur', 'PassagerController', 'devenirConducteur');
+$router->post('/passager/reservation/{reservation_id}/annuler', 'PassagerController', 'annulerReservation');
+$router->get('/passager/reservation/{reservation_id}/avis', 'PassagerController', 'laisserAvis');
+$router->post('/passager/reservation/{reservation_id}/avis', 'PassagerController', 'soumettreAvis');
+
+// --- Conducteur complémentaires ---
+$router->post('/conducteur/trajet/{trajet_id}/terminer', 'ConducteurController', 'terminerTrajet');
+$router->get('/conducteur/avis', 'ConducteurController', 'mesAvis');
 // ============================================
 // EXÉCUTION DU ROUTAGE
 // ============================================
