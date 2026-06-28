@@ -52,12 +52,9 @@ class AdminController extends Controller {
             'stats_globales'       => $statsGlobales,
         ];
 
-            echo '<pre>';
-            print_r($data['stats']);
-            echo '</pre>';
-            die();
+        $this->render('admin/dashboard', $data);
     }
-
+ 
     public function trajets() {
         $filters = [
             'statut' => $_GET['statut'] ?? '',
