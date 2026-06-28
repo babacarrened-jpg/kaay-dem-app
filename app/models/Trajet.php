@@ -232,4 +232,68 @@ class Trajet {
 
         return $this->db->resultSet();
     }
+
+    /**
+     * Nombre de trajets créés par mois (12 derniers mois)
+     */
+    public function getTrajetsByMonth(): array {
+        $this->db->query(
+            "SELECT
+                DATE_FORMAT(date_creation, '%Y-%m') AS mois,
+                DATE_FORMAT(date_creation, '%b %Y')  AS mois_label,
+                COUNT(*) AS total
+             FROM trajets
+             WHERE date_creation >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+             GROUP BY mois, mois_label
+             ORDER BY mois ASC"
+        );
+        return $this->db->resultSet();
+    }
+
+    /**
+     * Taux d'occupation moyen par mois (places réservées / places totales)
+     * Basé sur les trajets ayant au moins une réservation confirmée
+     */
+    public function getTauxOccupationByMonth(): array {
+        $this->db->query(
+            "SELECT
+                DATE_FORMAT(t.date_creation, '%Y-%m') AS mois,
+                DATE_FORMAT(t.date_creation, '%b %Y')  AS mois_label,
+                ROUND(
+                    SUM(t.places_totales - t.places_disponibles) /
+                    NULLIF(SUM(t.places_totales), 0) * 100
+                , 1) AS taux_occupation
+             FROM trajets t
+             WHERE t.date_creation >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+               AND t.statut IN ('termine','en_cours','planifie')
+             GROUP BY mois, mois_label
+             ORDER BY mois ASC"
+        );
+        return $this->db->resultSet();
+    }
+
+    /**
+     * Top conducteurs : classement par nombre de trajets effectués
+     */
+    public function getTopConducteurs(int $limit = 5): array {
+        $this->db->query(
+            "SELECT
+                u.id,
+                CONCAT(u.prenom, ' ', u.nom) AS conducteur,
+                u.photo_profil,
+                COUNT(t.id)                  AS nb_trajets,
+                SUM(CASE WHEN t.statut = 'termine' THEN 1 ELSE 0 END) AS trajets_termines,
+                ROUND(AVG(a.note), 1)        AS note_moyenne,
+                SUM(t.places_totales - t.places_disponibles) AS passagers_transportes
+             FROM utilisateurs u
+             JOIN trajets t ON t.conducteur_id = u.id
+             LEFT JOIN avis a ON a.destinataire_id = u.id
+             WHERE u.role = 'conducteur'
+             GROUP BY u.id, conducteur, u.photo_profil
+             ORDER BY nb_trajets DESC, note_moyenne DESC
+             LIMIT :limit"
+        );
+        $this->db->bind(':limit', $limit, \PDO::PARAM_INT);
+        return $this->db->resultSet();
+    }
 }

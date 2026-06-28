@@ -27,14 +27,22 @@ class AdminController extends Controller {
         $demandes = $this->userModel->getPendingConducteurRequests();
         $allTrajets = $this->trajetModel->getAll();
 
+        // --- Nouvelles statistiques ---
+        $trajetsByMonth    = $this->trajetModel->getTrajetsByMonth();
+        $tauxOccupation    = $this->trajetModel->getTauxOccupationByMonth();
+        $topConducteurs    = $this->trajetModel->getTopConducteurs(5);
+
         $data = [
             'titre' => 'Administration - Kaay Dem !',
             'stats' => [
-                'utilisateurs' => count($this->userModel->findAll()),
+                'utilisateurs'   => count($this->userModel->findAll()),
                 'trajets_actifs' => count($allTrajets),
-                'signalements' => 0
+                'signalements'   => 0
             ],
-            'demandes_conducteur' => $demandes
+            'demandes_conducteur'  => $demandes,
+            'trajets_by_month'     => $trajetsByMonth,
+            'taux_occupation'      => $tauxOccupation,
+            'top_conducteurs'      => $topConducteurs,
         ];
 
         $this->render('admin/dashboard', $data);
