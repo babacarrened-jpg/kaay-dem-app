@@ -296,4 +296,9 @@ class PassagerController extends Controller {
 
         $this->redirect('passager/reservations?error=avis_echec');
     }
+    public function getDemandeConducteur(int $userId) {
+        $this->db->query('SELECT * FROM demandes_conducteur WHERE utilisateur_id = :user_id ORDER BY id DESC LIMIT 1');
+        $this->db->bind(':user_id', $userId);
+        return $this->db->single();
+    }
 }

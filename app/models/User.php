@@ -50,61 +50,49 @@ class User implements RepositoryInterface {
         return $this->db->resultSet();
     }
 
-    public function validateConducteur(int $userId, int $adminId = 0): bool {
+    public function validateConducteur(int $demandeId, int $adminId = 0): bool {
+        // 1. Récupérer l'utilisateur_id depuis la demande
+        $this->db->query('SELECT utilisateur_id FROM demandes_conducteur WHERE id = :id');
+        $this->db->bind(':id', $demandeId);
+        $row = $this->db->single();
+        if (!$row) return false;
+
+        $userId = $row->utilisateur_id;
+
+        // 2. Mettre à jour l'utilisateur
         $this->db->query('UPDATE utilisateurs SET est_conducteur_valide = 1, role = :role WHERE id = :id');
         $this->db->bind(':role', 'conducteur');
         $this->db->bind(':id', $userId);
-        $updated = $this->db->execute();
+        $this->db->execute();
 
-        if ($updated) {
-            $this->db->query('SELECT id FROM demandes_conducteur WHERE utilisateur_id = :user_id ORDER BY id DESC LIMIT 1');
-            $this->db->bind(':user_id', $userId);
-            $row = $this->db->single();
-
-            if ($row) {
-                $this->db->query('UPDATE demandes_conducteur SET statut = :statut, admin_id = :admin_id, date_traitement = NOW() WHERE id = :id');
-                $this->db->bind(':statut', 'validee');
-                $this->db->bind(':admin_id', $adminId);
-                $this->db->bind(':id', $row->id);
-                $this->db->execute();
-            } else {
-                $this->db->query('INSERT INTO demandes_conducteur (utilisateur_id, statut, admin_id, date_traitement) VALUES (:user_id, :statut, :admin_id, NOW())');
-                $this->db->bind(':user_id', $userId);
-                $this->db->bind(':statut', 'validee');
-                $this->db->bind(':admin_id', $adminId);
-                $this->db->execute();
-            }
-        }
-
-        return $updated;
+        // 3. Mettre à jour la demande
+        $this->db->query('UPDATE demandes_conducteur SET statut = :statut, admin_id = :admin_id, date_traitement = NOW() WHERE id = :id');
+        $this->db->bind(':statut', 'validee');
+        $this->db->bind(':admin_id', $adminId);
+        $this->db->bind(':id', $demandeId);
+        return $this->db->execute();
     }
 
-    public function refuseConducteur(int $userId, int $adminId = 0): bool {
+    public function refuseConducteur(int $demandeId, int $adminId = 0): bool {
+        // 1. Récupérer l'utilisateur_id depuis la demande
+        $this->db->query('SELECT utilisateur_id FROM demandes_conducteur WHERE id = :id');
+        $this->db->bind(':id', $demandeId);
+        $row = $this->db->single();
+        if (!$row) return false;
+
+        $userId = $row->utilisateur_id;
+
+        // 2. Mettre à jour l'utilisateur
         $this->db->query('UPDATE utilisateurs SET est_conducteur_valide = 0 WHERE id = :id');
         $this->db->bind(':id', $userId);
-        $updated = $this->db->execute();
+        $this->db->execute();
 
-        if ($updated) {
-            $this->db->query('SELECT id FROM demandes_conducteur WHERE utilisateur_id = :user_id ORDER BY id DESC LIMIT 1');
-            $this->db->bind(':user_id', $userId);
-            $row = $this->db->single();
-
-            if ($row) {
-                $this->db->query('UPDATE demandes_conducteur SET statut = :statut, admin_id = :admin_id, date_traitement = NOW() WHERE id = :id');
-                $this->db->bind(':statut', 'rejetee');
-                $this->db->bind(':admin_id', $adminId);
-                $this->db->bind(':id', $row->id);
-                $this->db->execute();
-            } else {
-                $this->db->query('INSERT INTO demandes_conducteur (utilisateur_id, statut, admin_id, date_traitement) VALUES (:user_id, :statut, :admin_id, NOW())');
-                $this->db->bind(':user_id', $userId);
-                $this->db->bind(':statut', 'rejetee');
-                $this->db->bind(':admin_id', $adminId);
-                $this->db->execute();
-            }
-        }
-
-        return $updated;
+        // 3. Mettre à jour la demande
+        $this->db->query('UPDATE demandes_conducteur SET statut = :statut, admin_id = :admin_id, date_traitement = NOW() WHERE id = :id');
+        $this->db->bind(':statut', 'rejetee');
+        $this->db->bind(':admin_id', $adminId);
+        $this->db->bind(':id', $demandeId);
+        return $this->db->execute();
     }
 
     public function findById(int $id) {
@@ -160,25 +148,13 @@ class User implements RepositoryInterface {
         return $this->db->execute();
     }
 
-    /**
-     * Récupère la dernière demande "devenir conducteur" d'un utilisateur
-     * (en_attente / validee / rejetee), ou null s'il n'en a jamais fait.
-     */
-    public function getDemandeConducteur(int $userId) {
-        $this->db->query('SELECT * FROM demandes_conducteur WHERE utilisateur_id = :user_id ORDER BY id DESC LIMIT 1');
-        $this->db->bind(':user_id', $userId);
-        return $this->db->single();
-    }
-
     public function countByRole(string $role): int {
         $this->db->query("SELECT COUNT(*) as total FROM utilisateurs WHERE role = :role");
         $this->db->bind(':role', $role);
         $row = $this->db->single();
         return $row ? (int)$row->total : 0;
     }
-        /**
-     * Recherche d'utilisateurs
-     */
+
     public function search(string $term): array {
         $term = '%' . $term . '%';
         $this->db->query('SELECT * FROM utilisateurs 
@@ -191,9 +167,6 @@ class User implements RepositoryInterface {
         return $this->db->resultSet();
     }
 
-    /**
-     * Suspend un utilisateur
-     */
     public function suspend(int $id): bool {
         $this->db->query('UPDATE utilisateurs SET statut = :statut WHERE id = :id');
         $this->db->bind(':statut', 'suspendu');
@@ -201,9 +174,6 @@ class User implements RepositoryInterface {
         return $this->db->execute();
     }
 
-    /**
-     * Réactive un utilisateur
-     */
     public function unsuspend(int $id): bool {
         $this->db->query('UPDATE utilisateurs SET statut = :statut WHERE id = :id');
         $this->db->bind(':statut', 'actif');
@@ -211,9 +181,6 @@ class User implements RepositoryInterface {
         return $this->db->execute();
     }
 
-    /**
-     * Met à jour un utilisateur (par l'admin)
-     */
     public function updateByAdmin(int $id, array $data): bool {
         $this->db->query('UPDATE utilisateurs 
                           SET nom = :nom, prenom = :prenom, email = :email, 
@@ -228,9 +195,6 @@ class User implements RepositoryInterface {
         return $this->db->execute();
     }
 
-    /**
-     * Compte par statut
-     */
     public function countByStatut(string $statut): int {
         $this->db->query("SELECT COUNT(*) as total FROM utilisateurs WHERE statut = :statut");
         $this->db->bind(':statut', $statut);
@@ -238,12 +202,15 @@ class User implements RepositoryInterface {
         return $row ? (int)$row->total : 0;
     }
 
-        public function getCountByStatut(string $statut): int {
+    public function getCountByStatut(string $statut): int {
         $this->db->query("SELECT COUNT(*) as total FROM utilisateurs WHERE statut = :statut");
         $this->db->bind(':statut', $statut);
         $row = $this->db->single();
         return $row ? (int)$row->total : 0;
     }
-
-
+    public function getDemandeConducteur(int $userId) {
+        $this->db->query('SELECT * FROM demandes_conducteur WHERE utilisateur_id = :user_id ORDER BY id DESC LIMIT 1');
+        $this->db->bind(':user_id', $userId);
+        return $this->db->single();
+    }
 }
