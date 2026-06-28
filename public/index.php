@@ -76,6 +76,12 @@ $router->post('/admin/refuserConducteur/{id}', 'AdminController', 'refuserConduc
 $router->post('/passager/reservation/{reservation_id}/annuler', 'PassagerController', 'annulerReservation');
 // Ajoute cette ligne dans public/index.php (section Conducteur)
 $router->post('/conducteur/trajet/{trajet_id}/terminer', 'ConducteurController', 'terminerTrajet');
+// Ajouter dans la section --- Passager ---
+$router->get('/passager/reservation/{reservation_id}/avis', 'PassagerController', 'laisserAvis');
+$router->post('/passager/reservation/{reservation_id}/avis', 'PassagerController', 'soumettreAvis');
+
+// Dans la section --- Conducteur ---
+$router->get('/conducteur/avis', 'ConducteurController', 'mesAvis');
 
 
 // ============================================
