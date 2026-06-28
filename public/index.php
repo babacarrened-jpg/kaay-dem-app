@@ -1,21 +1,15 @@
 <?php
 // public/index.php (Front Controller)
 opcache_reset();
-// Démarrage de la session
+
 session_start();
 
-// Chargement des fichiers de configuration et du cœur de l'application
 require_once '../app/config/config.php';
 require_once '../app/core/Database.php';
 require_once '../app/core/Controller.php';
 require_once '../app/core/Router.php';
 
-// Initialisation du routeur
 $router = new Router();
-
-// ============================================
-// DÉFINITION DES ROUTES
-// ============================================
 
 // --- Pages Publiques ---
 $router->get('/', 'HomeController', 'index');
@@ -30,7 +24,7 @@ $router->get('/auth/inscription', 'AuthController', 'registerForm');
 $router->post('/auth/inscription', 'AuthController', 'register');
 $router->get('/auth/deconnexion', 'AuthController', 'logout');
 
-// --- Trajets (Recherche & Détails) ---
+// --- Trajets ---
 $router->get('/trajets/recherche', 'TrajetController', 'searchForm');
 $router->get('/trajets/resultats', 'TrajetController', 'searchResults');
 $router->get('/trajets/detail/{id}', 'TrajetController', 'detail');
@@ -58,6 +52,7 @@ $router->post('/conducteur/trajet/{trajet_id}/annuler', 'ConducteurController', 
 $router->post('/conducteur/trajet/{trajet_id}/terminer', 'ConducteurController', 'terminerTrajet');
 $router->get('/conducteur/trajet/{trajet_id}/passagers', 'ConducteurController', 'mesPassagers');
 $router->get('/conducteur/reservations', 'ConducteurController', 'reservations');
+$router->get('/api/conducteur/reservations', 'ConducteurController', 'getReservationsAjax');
 $router->post('/conducteur/reservation/{reservation_id}/accept', 'ConducteurController', 'acceptReservation');
 $router->post('/conducteur/reservation/{reservation_id}/reject', 'ConducteurController', 'rejectReservation');
 $router->get('/conducteur/avis', 'ConducteurController', 'mesAvis');
@@ -72,8 +67,6 @@ $router->get('/admin/messages', 'AdminController', 'messages');
 $router->post('/admin/messages/{id}/lu', 'AdminController', 'marquerMessageLu');
 $router->post('/admin/validerConducteur/{id}', 'AdminController', 'validerConducteur');
 $router->post('/admin/refuserConducteur/{id}', 'AdminController', 'refuserConducteur');
-
-// --- Admin : Gestion des utilisateurs ---
 $router->get('/admin/utilisateurs', 'AdminController', 'utilisateurs');
 $router->get('/admin/utilisateur/{id}', 'AdminController', 'voirUtilisateur');
 $router->post('/admin/utilisateur/{id}/modifier', 'AdminController', 'modifierUtilisateur');
@@ -81,28 +74,12 @@ $router->post('/admin/utilisateur/{id}/suspendre', 'AdminController', 'suspendre
 $router->post('/admin/utilisateur/{id}/reactiver', 'AdminController', 'reactiverUtilisateur');
 $router->post('/admin/utilisateur/{id}/supprimer', 'AdminController', 'supprimerUtilisateur');
 
-// --- Passager complémentaires ---
-$router->get('/passager/devenirConducteur', 'PassagerController', 'devenirConducteurForm');
-$router->post('/passager/devenirConducteur', 'PassagerController', 'devenirConducteur');
-$router->post('/passager/reservation/{reservation_id}/annuler', 'PassagerController', 'annulerReservation');
-$router->get('/passager/reservation/{reservation_id}/avis', 'PassagerController', 'laisserAvis');
-$router->post('/passager/reservation/{reservation_id}/avis', 'PassagerController', 'soumettreAvis');
-
-// --- Conducteur complémentaires ---
-$router->post('/conducteur/trajet/{trajet_id}/terminer', 'ConducteurController', 'terminerTrajet');
-$router->get('/conducteur/avis', 'ConducteurController', 'mesAvis');
 // ============================================
-// EXÉCUTION DU ROUTAGE
-// ============================================
-
 $uri = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];
 
 if (!empty($_GET['url'])) {
-    $uri = '/' . trim($_GET['url'git add .
-git commit -m "intégration des cartes et Le dashboard passe maintenant par une vérification côté PHP sur la date/heure réelle du trajet, et les trajets"
-git push
-], '/');
+    $uri = '/' . trim($_GET['url'], '/');
 }
 
 $router->dispatch($uri, $method);
