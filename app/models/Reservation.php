@@ -35,9 +35,10 @@ class Reservation implements RepositoryInterface {
                 throw new PlacesInsuffisantesException();
             }
 
-            $status = (!empty($trajet->est_conducteur_valide))
-                ? ReservationStatus::CONFIRMEE->value
-                : ReservationStatus::EN_ATTENTE->value;
+            // Toute nouvelle réservation démarre EN_ATTENTE : c'est au conducteur
+            // de l'accepter ou de la refuser (cycle de vie défini par le sujet).
+            $status = ReservationStatus::EN_ATTENTE->value;
+
 
             $this->db->query("SELECT COUNT(*) as count_reservations FROM reservations r JOIN trajets t ON r.trajet_id = t.id WHERE r.passager_id = :passager_id AND r.statut IN ('en_attente', 'confirmee') AND t.date_trajet = :date_trajet AND t.id <> :trajet_id");
             $this->db->bind(':passager_id', $passager_id);
