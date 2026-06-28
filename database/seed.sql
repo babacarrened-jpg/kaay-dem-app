@@ -3,24 +3,22 @@
 -- ========================================================
 /*conducteur : conducteur123
     passager : passager123             ------------moguini-------
-    admin : admin123@*/
+    admin : admin123@     
+    */
 
 -- Insérer des utilisateurs de test
--- Conducteurs (est_conducteur_valide = 1)
-INSERT INTO utilisateurs (nom, prenom, email, telephone, mot_de_passe, role, est_conducteur_valide, statut) VALUES
-('Dupont', 'Jean', 'jean.dupont@example.com', '+221770000001', '$2b$10$Bkx5tkjIstT3JYUmQnse3eRUiZnvbFZenq66RZ3pisduTHriS3NJK', 'conducteur', 1, 'actif'),
-('Sarr', 'Fatou', 'fatou.sarr@example.com', '+221770000002', '$2b$10$Bkx5tkjIstT3JYUmQnse3eRUiZnvbFZenq66RZ3pisduTHriS3NJK', 'conducteur', 1, 'actif'),
-('Ba', 'Omar', 'omar.ba@example.com', '+221770000003', '$2b$10$Bkx5tkjIstT3JYUmQnse3eRUiZnvbFZenq66RZ3pisduTHriS3NJK', 'conducteur', 1, 'actif');
-
--- Passagers
-INSERT INTO utilisateurs (nom, prenom, email, telephone, mot_de_passe, role, est_conducteur_valide, statut) VALUES
-('Faye', 'Aminata', 'aminata.faye@example.com', '+221770000004', '$2b$10$.JMazSMmSm32WvhQJB2LruPPrGnYAu1X43.cbpUrsmccOOPdeoBgy', 'passager', 0, 'actif'),
-('Gueye', 'Ibrahima', 'ibrahima.gueye@example.com', '+221770000005', '$2b$10$.JMazSMmSm32WvhQJB2LruPPrGnYAu1X43.cbpUrsmccOOPdeoBgy', 'passager', 0, 'actif'),
-('Mbaye', 'Rokhaya', 'rokhaya.mbaye@example.com', '+221770000006', '$2b$10$.JMazSMmSm32WvhQJB2LruPPrGnYAu1X43.cbpUrsmccOOPdeoBgy', 'passager', 0, 'actif');
-
--- Admin
-INSERT INTO utilisateurs (nom, prenom, email, telephone, mot_de_passe, role, est_conducteur_valide, statut) VALUES
-('Admin', 'Kaay', 'admin2@kaaydem.sn', '+221700000002', '$2b$10$fZCKG/ccSt86czzx4/TVcuKvoig9ktaKiOqq85g2hQrExWAcCFpGq', 'admin', 0, 'actif');
+INSERT INTO utilisateurs (nom, prenom, email, telephone, mot_de_passe, photo_profil, role, est_conducteur_valide, statut) VALUES
+('Ndiaye', 'Cheikh', 'cheikh.ndiaye@test.com', '+221771234567', '$2b$10$SamGjFcl5coAlDsgFtIaOuPeIRyhrZWk141ourujhkBAz79eBo2Ei', 'default-avatar.png', 'conducteur', 1, 'actif'),
+('Diop', 'Lamine', 'lamine.diop@gmail.com', '+221772345678', '$2b$10$1vBTrBOg8qf3wD6cVX6mg.ht0.PjLLljSXMwQsFTzbSfWNf4sbL.S', 'default-avatar.png', 'passager', 0, 'actif'),
+('Fall', 'Seydou', 'seydou.fall@example.com', '+221773456789', '$2b$10$SamGjFcl5coAlDsgFtIaOuPeIRyhrZWk141ourujhkBAz79eBo2Ei', 'default-avatar.png', 'conducteur', 1, 'actif'),
+('Mbaye', 'Aminata', 'aminata.mbaye@gmail.com', '+221774567890', '$2b$10$1vBTrBOg8qf3wD6cVX6mg.ht0.PjLLljSXMwQsFTzbSfWNf4sbL.S', 'default-avatar.png', 'passager', 0, 'actif'),
+('Gueye', 'Rokhaya', 'rokhaya.gueye@example.com', '+221775678901', '$2b$10$1vBTrBOg8qf3wD6cVX6mg.ht0.PjLLljSXMwQsFTzbSfWNf4sbL.S', 'default-avatar.png', 'passager', 0, 'actif'),
+('Sarr', 'Pape', 'pape.sarr@gmail.com', '+221776789012', '$2b$10$SamGjFcl5coAlDsgFtIaOuPeIRyhrZWk141ourujhkBAz79eBo2Ei', 'default-avatar.png', 'conducteur', 1, 'actif'),
+('Ba', 'Fatou', 'fatou.ba@example.com', '+221777890123', '$2b$10$1vBTrBOg8qf3wD6cVX6mg.ht0.PjLLljSXMwQsFTzbSfWNf4sbL.S', 'default-avatar.png', 'passager', 0, 'actif'),
+('Faye', 'Ibrahima', 'ibrahima.faye@example.com', '+221778901234', '$2b$10$SamGjFcl5coAlDsgFtIaOuPeIRyhrZWk141ourujhkBAz79eBo2Ei', 'default-avatar.png', 'conducteur', 1, 'actif'),
+('Diallo', 'Marieme', 'marieme.diallo@example.com', '+221779012345', '$2b$10$1vBTrBOg8qf3wD6cVX6mg.ht0.PjLLljSXMwQsFTzbSfWNf4sbL.S', 'default-avatar.png', 'passager', 0, 'actif'),
+('Sow', 'Ousmane', 'ousmane.sow@example.com', '+221770123456', '$2b$10$1vBTrBOg8qf3wD6cVX6mg.ht0.PjLLljSXMwQsFTzbSfWNf4sbL.S', 'default-avatar.png', 'passager', 0, 'actif'),
+('Admin', 'Kaay', 'admin2@kaaydem.sn', '+221700000002', '$2b$10$ohqop/KnR/j9P5Xc.OpUBOdJ7r1ONIJcQcx1Rhc0m6UszuVNRLpRi', 'default-avatar.png', 'admin', 0, 'actif');
 
 -- Insérer des véhicules
 INSERT INTO vehicules (conducteur_id, marque, modele, couleur, immatriculation, nombre_places) VALUES
