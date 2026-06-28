@@ -16,9 +16,6 @@ class Reservation implements RepositoryInterface {
         $this->db = new Database();
     }
 
-    /**
-     * Créer une nouvelle réservation
-     */
     public function reserver($trajet_id, $passager_id, $places, $prix_total) {
         $this->db->query("START TRANSACTION");
         $this->db->execute();
@@ -35,8 +32,6 @@ class Reservation implements RepositoryInterface {
                 throw new PlacesInsuffisantesException();
             }
 
-            // Toute nouvelle réservation démarre EN_ATTENTE : c'est au conducteur
-            // de l'accepter ou de la refuser (cycle de vie défini par le sujet).
             $status = ReservationStatus::EN_ATTENTE->value;
 
             $this->db->query("SELECT id FROM reservations WHERE passager_id = :passager_id AND trajet_id = :trajet_id AND statut IN ('en_attente', 'confirmee')");
@@ -58,8 +53,7 @@ class Reservation implements RepositoryInterface {
                 throw new ReservationConflictException();
             }
 
-            $this->db->query("INSERT INTO reservations (trajet_id, passager_id, places_reservees, prix_total, statut) 
-                              VALUES (:trajet_id, :passager_id, :places, :prix_total, :statut)");
+            $this->db->query("INSERT INTO reservations (trajet_id, passager_id, places_reservees, prix_total, statut) VALUES (:trajet_id, :passager_id, :places, :prix_total, :statut)");
             $this->db->bind(':trajet_id', $trajet_id);
             $this->db->bind(':passager_id', $passager_id);
             $this->db->bind(':places', $places);
@@ -92,24 +86,18 @@ class Reservation implements RepositoryInterface {
         }
     }
 
-    /**
-     * Récupérer les réservations d'un passager
-     */
-   public function getByPassager($passager_id) {
-    $this->db->query("SELECT r.*, t.ville_depart, t.ville_arrivee, t.date_trajet, t.heure_depart,
-                             t.statut as trajet_statut, t.conducteur_id,
-                             u.nom as conducteur_nom, u.prenom as conducteur_prenom
-                      FROM reservations r
-                      JOIN trajets t ON r.trajet_id = t.id
-                      JOIN utilisateurs u ON t.conducteur_id = u.id
-                      WHERE r.passager_id = :passager_id
-                      ORDER BY t.date_trajet DESC");
-    $this->db->bind(':passager_id', $passager_id);
-    return $this->db->resultSet();
-}
-    /**
-     * Récupérer les réservations en attente pour un conducteur (pour ses trajets)
-     */
+    public function getByPassager($passager_id) {
+        $this->db->query("SELECT r.*, t.ville_depart, t.ville_arrivee, t.date_trajet, t.heure_depart,
+                                 u.nom as conducteur_nom, u.prenom as conducteur_prenom
+                          FROM reservations r
+                          JOIN trajets t ON r.trajet_id = t.id
+                          JOIN utilisateurs u ON t.conducteur_id = u.id
+                          WHERE r.passager_id = :passager_id
+                          ORDER BY t.date_trajet DESC");
+        $this->db->bind(':passager_id', $passager_id);
+        return $this->db->resultSet();
+    }
+
     public function getPendingByConducteur($conducteur_id) {
         $this->db->query("SELECT r.*, t.ville_depart, t.ville_arrivee, t.date_trajet, t.heure_depart, t.places_totales, t.places_disponibles, u.nom as passager_nom, u.prenom as passager_prenom
                           FROM reservations r
@@ -122,9 +110,6 @@ class Reservation implements RepositoryInterface {
         return $this->db->resultSet();
     }
 
-    /**
-     * Détails d'une réservation utile au conducteur (sans contrainte passager)
-     */
     public function getDetailForConducteur(int $reservation_id) {
         $this->db->query("SELECT r.*, t.conducteur_id, t.ville_depart, t.ville_arrivee, t.date_trajet, t.heure_depart, t.places_totales, t.places_disponibles, u.nom as passager_nom, u.prenom as passager_prenom
                           FROM reservations r
@@ -135,9 +120,6 @@ class Reservation implements RepositoryInterface {
         return $this->db->single();
     }
 
-    /**
-     * Modifier le statut d'une réservation. Si on annule, restituer les places.
-     */
     public function setStatus(int $reservation_id, string $status) {
         $this->db->query('START TRANSACTION');
         $this->db->execute();
@@ -213,7 +195,7 @@ class Reservation implements RepositoryInterface {
     }
 
     public function getDetailById(int $reservation_id, int $passager_id) {
-        $this->db->query("SELECT r.*, t.conducteur_id, t.ville_depart, t.ville_arrivee, t.date_trajet, t.heure_depart, t.places_totales, t.places_disponibles, t.prix_par_place, t.description, t.statut as trajet_statut,
+        $this->db->query("SELECT r.*, t.ville_depart, t.ville_arrivee, t.date_trajet, t.heure_depart, t.places_totales, t.places_disponibles, t.prix_par_place, t.description,
                                  u.nom as conducteur_nom, u.prenom as conducteur_prenom, u.telephone as conducteur_tel, v.marque, v.modele, v.couleur, v.immatriculation
                           FROM reservations r
                           JOIN trajets t ON r.trajet_id = t.id
@@ -225,10 +207,6 @@ class Reservation implements RepositoryInterface {
         return $this->db->single();
     }
 
-    /**
-     * Calcule le total des gains d'un conducteur pour le mois en cours
-     * (réservations confirmées dont la date de réservation tombe ce mois-ci)
-     */
     public function getGainsMoisCourant(int $conducteurId): float {
         $this->db->query("SELECT COALESCE(SUM(r.prix_total), 0) as total
                           FROM reservations r
@@ -278,11 +256,8 @@ class Reservation implements RepositoryInterface {
         return $this->db->execute();
     }
 
-    /**
-     * Récupère tous les passagers des trajets d'un conducteur
-     */
     public function getPassagersByConducteur(int $conducteur_id): array {
-        $this->db->query("SELECT 
+        $this->db->query("SELECT
                             u.id, u.nom, u.prenom, u.email, u.telephone, u.photo_profil,
                             r.id AS reservation_id,
                             r.places_reservees, r.prix_total,
@@ -300,10 +275,6 @@ class Reservation implements RepositoryInterface {
         return $this->db->resultSet();
     }
 
-    /**
-     * Récupère les passagers d'un trajet précis, en vérifiant que ce trajet
-     * appartient bien au conducteur connecté (sécurité : pas d'accès croisé).
-     */
     public function getPassagersByTrajet(int $trajet_id, int $conducteur_id): array {
         $this->db->query("SELECT
                             u.id, u.nom, u.prenom, u.email, u.telephone, u.photo_profil,
@@ -322,5 +293,11 @@ class Reservation implements RepositoryInterface {
         $this->db->bind(':trajet_id', $trajet_id);
         $this->db->bind(':conducteur_id', $conducteur_id);
         return $this->db->resultSet();
+    }
+
+    public function countAll(): int {
+        $this->db->query("SELECT COUNT(*) as total FROM reservations");
+        $row = $this->db->single();
+        return $row ? (int)$row->total : 0;
     }
 }

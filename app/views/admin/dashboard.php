@@ -83,8 +83,8 @@
         </div>
     </section>
 
-    <!-- KPIs supplémentaires -->
-    <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+    <!-- KPIs supplémentaires — card "Trajets publiés" supprimée, compteurs animés ajoutés -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
 
         <!-- Conducteurs -->
         <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex justify-between items-start hover:-translate-y-1 hover:shadow-md transition-all duration-300">
@@ -94,7 +94,8 @@
                 </svg>
             </div>
             <div class="text-right">
-                <div class="font-display text-3xl font-bold text-slate-900 leading-none mb-1"><?= $stats['nb_conducteurs'] ?? 0 ?></div>
+                <div class="font-display text-3xl font-bold text-slate-900 leading-none mb-1"
+                     data-counter="<?= $stats['nb_conducteurs'] ?? 0 ?>">0</div>
                 <div class="text-xs font-medium text-slate-500">Conducteurs</div>
             </div>
         </div>
@@ -107,21 +108,9 @@
                 </svg>
             </div>
             <div class="text-right">
-                <div class="font-display text-3xl font-bold text-slate-900 leading-none mb-1"><?= $stats['nb_passagers'] ?? 0 ?></div>
+                <div class="font-display text-3xl font-bold text-slate-900 leading-none mb-1"
+                     data-counter="<?= $stats['nb_passagers'] ?? 0 ?>">0</div>
                 <div class="text-xs font-medium text-slate-500">Passagers</div>
-            </div>
-        </div>
-
-        <!-- Trajets publiés -->
-        <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex justify-between items-start hover:-translate-y-1 hover:shadow-md transition-all duration-300">
-            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c-.317-.159-.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
-                </svg>
-            </div>
-            <div class="text-right">
-                <div class="font-display text-3xl font-bold text-slate-900 leading-none mb-1"><?= $stats['nb_trajets'] ?? 0 ?></div>
-                <div class="text-xs font-medium text-slate-500">Trajets publiés</div>
             </div>
         </div>
 
@@ -133,12 +122,31 @@
                 </svg>
             </div>
             <div class="text-right">
-                <div class="font-display text-3xl font-bold text-slate-900 leading-none mb-1"><?= $stats['nb_reservations'] ?? 0 ?></div>
+                <div class="font-display text-3xl font-bold text-slate-900 leading-none mb-1"
+                     data-counter="<?= $stats['nb_reservations'] ?? 0 ?>">0</div>
                 <div class="text-xs font-medium text-slate-500">Réservations</div>
             </div>
         </div>
 
     </section>
+
+    <!-- Script compteur animé -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('[data-counter]').forEach(function (el) {
+            var target = parseInt(el.dataset.counter, 10) || 0;
+            var duration = 1200;
+            var start = performance.now();
+            function tick(now) {
+                var p = Math.min((now - start) / duration, 1);
+                var ease = 1 - Math.pow(1 - p, 3);
+                el.textContent = Math.round(ease * target);
+                if (p < 1) requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+        });
+    });
+    </script>
 
     <?php if(!empty($trajets_actifs)): ?>
     <section class="mb-10">
