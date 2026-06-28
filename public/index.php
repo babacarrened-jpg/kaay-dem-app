@@ -1,6 +1,5 @@
 <?php
 // public/index.php (Front Controller)
-opcache_reset();
 
 session_start();
 
