@@ -1,17 +1,18 @@
 <div style="max-width: 1100px; margin: 40px auto; padding: 0 20px;">
     
-    <div class="page-header">
-        <div class="page-title-group">
-            <div class="page-title-icon">
+    <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; gap:20px; margin-bottom:32px;">
+        <div class="page-title-group" style="display:flex; align-items:center; gap:16px;">
+            <div class="page-title-icon" style="width:56px; height:56px; background:#f97316; color:white; border-radius:18px; display:flex; align-items:center; justify-content:center;">
                 <i data-lucide="car" width="28" height="28"></i>
             </div>
             <div>
-                <h1>Espace Conducteur</h1>
-                <p>Gérez vos trajets proposés et vos réservations passagers.</p>
+                <h1 style="font-size:2rem; margin:0;">Espace Conducteur</h1>
+                <p style="margin:4px 0 0; color:#64748b;">Gérez vos trajets et réservations.</p>
             </div>
         </div>
-        <a href="<?= BASE_URL ?>conducteur/trajets/nouveau" class="btn btn-primary">
-            <i data-lucide="plus-circle"></i> Publier un trajet
+        <a href="<?= BASE_URL ?>conducteur/trajets/nouveau" style="display:inline-flex; align-items:center; gap:8px; background:#f97316; color:white; padding:12px 24px; border-radius:12px; text-decoration:none; font-weight:600; font-size:16px; transition:all 0.3s; box-shadow:0 4px 12px rgba(249,115,22,0.3);" onmouseover="this.style.background='#ea580c'; this.style.boxShadow='0 6px 16px rgba(249,115,22,0.4)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='#f97316'; this.style.boxShadow='0 4px 12px rgba(249,115,22,0.3)'; this.style.transform='translateY(0)';">
+            <i data-lucide="plus-circle" width="20" height="20" style="vertical-align:middle;"></i> 
+            Nouveau trajet
         </a>
     </div>
 
@@ -99,8 +100,9 @@
                         <span><i data-lucide="truck" width="14" height="14" style="vertical-align:middle;"></i> <?= htmlspecialchars($trajet->marque . ' ' . $trajet->modele) ?></span>
                     </div>
                     <form action="<?= BASE_URL ?>conducteur/trajet/<?= $trajet->id ?>/annuler" method="POST" onsubmit="return confirm('Annuler ce trajet ? Cette action est irréversible.');">
-                        <button type="submit" class="btn btn-outline" style="width:100%; justify-content:center; font-size:13px; padding:10px;">
-                            <i data-lucide="x-circle" width="16" height="16"></i> Annuler ce trajet
+                        <button type="submit" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; background:#ff4444; color:white; padding:12px 16px; border:none; border-radius:8px; font-weight:600; font-size:14px; cursor:pointer; transition:all 0.3s;" onmouseover="this.style.background='#cc0000'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(255,68,68,0.4)';" onmouseout="this.style.background='#ff4444'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                            <i data-lucide="x-circle" width="16" height="16" style="vertical-align:middle;"></i> 
+                            Annuler ce trajet
                         </button>
                     </form>
                 </div>
@@ -113,8 +115,8 @@
             </div>
             <h3 style="font-size: 24px; margin-bottom: 8px;">Aucun trajet prévu</h3>
             <p style="color: var(--text-muted); margin-bottom: 24px;">Vous n'avez aucun trajet planifié pour le moment.</p>
-            <a href="<?= BASE_URL ?>conducteur/trajets/nouveau" class="btn btn-outline">
-                <i data-lucide="plus"></i> Publier votre premier trajet
+            <a href="<?= BASE_URL ?>conducteur/trajets/nouveau" style="display:inline-flex; align-items:center; gap:8px; background:#f97316; color:white; padding:12px 24px; border-radius:12px; text-decoration:none; font-weight:600; font-size:16px; box-shadow:0 4px 12px rgba(249,115,22,0.3);">
+                <i data-lucide="plus-circle" width="20" height="20" style="vertical-align:middle;"></i> Publier votre premier trajet
             </a>
         </div>
     <?php endif; ?>
@@ -208,10 +210,10 @@
                     }).addTo(map);
                     bounds.extend(routeLayer.getBounds());
 
-                    const departMarker = L.marker([from.lat, from.lon], { icon: getMarkerIcon(color) })
+                    L.marker([from.lat, from.lon], { icon: getMarkerIcon(color) })
                         .bindPopup(`<strong>Départ</strong><br>${trajet.depart}<br><small>${trajet.date} ${trajet.heure}</small>`)
                         .addTo(map);
-                    const arriveeMarker = L.marker([to.lat, to.lon], { icon: getMarkerIcon(color) })
+                    L.marker([to.lat, to.lon], { icon: getMarkerIcon(color) })
                         .bindPopup(`<strong>Arrivée</strong><br>${trajet.arrivee}<br><small>${trajet.date} ${trajet.heure}</small>`)
                         .addTo(map);
 

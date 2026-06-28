@@ -1,16 +1,13 @@
 <nav id="main-nav" class="sticky top-0 z-50 transition-all duration-500" aria-label="Navigation principale">
 
-    <!-- Fond glassmorphism avec gradient subtil -->
     <div class="absolute inset-0 bg-white/60 backdrop-blur-2xl border-b border-white/30 shadow-[0_4px_24px_rgba(0,0,0,0.06)]" aria-hidden="true"></div>
 
     <div class="relative max-w-7xl mx-auto px-6 lg:px-10 h-20 flex items-center justify-between">
 
         <!-- Logo -->
         <a href="<?= BASE_URL ?>" class="flex items-center group flex-shrink-0" aria-label="Kaay Dem - Accueil">
-            <!-- Desktop : logo principal -->
             <img src="<?= BASE_URL ?>assets/images/logo2.png" alt="Kaay Dem"
                 class="hidden md:block h-10 w-auto transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-md">
-            <!-- Mobile : même logo en plus petit -->
             <img src="<?= BASE_URL ?>assets/images/logo1.png" alt="Kaay Dem"
                 class="block md:hidden h-10 w-auto transition-all duration-300 group-hover:scale-105">
         </a>
@@ -18,7 +15,6 @@
         <!-- Navigation Desktop -->
         <div class="hidden md:flex items-center gap-2">
 
-            <!-- Liens nav -->
             <a href="<?= BASE_URL ?>trajets/recherche"
                 class="nav-link group flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-white/70 transition-all duration-200">
                 <span class="p-1 rounded-lg bg-slate-100 group-hover:bg-brand-100 transition-colors">
@@ -39,7 +35,6 @@
                 À propos
             </a>
 
-            <!-- Séparateur -->
             <div class="w-px h-6 bg-slate-200/80 mx-1" aria-hidden="true"></div>
 
             <?php if (isset($_SESSION['user_id'])) : ?>
@@ -54,6 +49,24 @@
                 }
                 ?>
 
+                <!-- Liens conducteur desktop -->
+                <?php if (in_array('conducteur', $roles, true)): ?>
+                    <a href="<?= BASE_URL ?>conducteur/trajets"
+                        class="nav-link group flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-white/70 transition-all duration-200">
+                        🚗 Mes trajets
+                    </a>
+                    <a href="<?= BASE_URL ?>conducteur/reservations"
+                        class="nav-link group flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-white/70 transition-all duration-200">
+                        🎫 Réservations
+                    </a>
+                    <a href="<?= BASE_URL ?>conducteur/trajets/nouveau"
+                        class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-200"
+                        style="background:#f97316; box-shadow:0 2px 8px rgba(249,115,22,0.3);">
+                        ＋ Nouveau trajet
+                    </a>
+                    <div class="w-px h-6 bg-slate-200/80 mx-1" aria-hidden="true"></div>
+                <?php endif; ?>
+
                 <!-- Dashboard icon -->
                 <a href="<?= $dashboard_link ?>"
                     class="p-2.5 rounded-xl text-slate-500 hover:text-brand-600 hover:bg-brand-50 transition-all duration-200"
@@ -62,17 +75,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
                     </svg>
                 </a>
-
-                <!-- Lien Mes passagers (conducteur uniquement) -->
-                <?php if (in_array('conducteur', $roles, true)) : ?>
-                    <a href="<?= BASE_URL ?>conducteur/passagers"
-                        class="p-2.5 rounded-xl text-slate-500 hover:text-brand-600 hover:bg-brand-50 transition-all duration-200"
-                        title="Mes passagers">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                        </svg>
-                    </a>
-                <?php endif; ?>
 
                 <!-- Avatar pill -->
                 <a href="<?= BASE_URL ?>profil"
@@ -92,7 +94,7 @@
                 <a href="<?= BASE_URL ?>auth/deconnexion"
                     class="p-2.5 rounded-xl bg-red-50 text-red-500 hover:bg-red-600 hover:text-white transition-all duration-200 shadow-sm"
                     title="Se déconnecter">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4.5 h-4.5 w-[18px] h-[18px]">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-[18px] h-[18px]">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
                     </svg>
                 </a>
@@ -119,9 +121,7 @@
         <!-- Bouton hamburger mobile -->
         <button id="mobile-menu-btn"
             class="md:hidden relative z-10 p-2.5 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-white/70 transition-all duration-200"
-            aria-label="Ouvrir le menu"
-            aria-expanded="false"
-            aria-controls="mobile-menu">
+            aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu">
             <svg id="icon-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
             </svg>
@@ -131,15 +131,10 @@
         </button>
     </div>
 
-    <!-- Menu Mobile (drawer) -->
-    <div id="mobile-menu"
-        class="md:hidden overflow-hidden max-h-0 transition-[max-height,opacity] duration-500 ease-in-out opacity-0"
-        aria-hidden="true">
-
-        <div class="relative bg-white/80 backdrop-blur-2xl border-t border-slate-100/80 px-6 py-5 flex flex-col gap-2">
-
-            <!-- Gradient décoratif -->
-            <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-brand-100/40 to-transparent rounded-full -translate-y-1/2 translate-x-1/4 pointer-events-none" aria-hidden="true"></div>
+    <!-- Menu Mobile -->
+    <div id="mobile-menu" style="max-height:0; opacity:0; overflow:hidden; transition: max-height 0.3s ease, opacity 0.3s ease;"
+        aria-hidden="true" role="dialog" aria-label="Menu mobile">
+        <div class="relative px-4 pb-4 pt-2 flex flex-col gap-1 bg-white/95 backdrop-blur-xl border-t border-slate-100">
 
             <a href="<?= BASE_URL ?>trajets/recherche"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-brand-50 transition-all duration-200 group">
@@ -153,7 +148,7 @@
 
             <a href="<?= BASE_URL ?>a-propos"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-brand-50 transition-all duration-200 group">
-                <div class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-brand-100 flex items-center justify-center transition-colors flex-shrink-0">
+                <div class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-brand-100 flex items-center justify-content: center transition-colors flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-500 group-hover:text-brand-600">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
                     </svg>
@@ -179,13 +174,13 @@
                     </div>
                     <div>
                         <div class="text-sm font-semibold text-slate-900"><?= htmlspecialchars($_SESSION['user_prenom']) ?></div>
-                        <div class="text-xs text-slate-400"><?= ucfirst($_SESSION['user_role']) ?> <?= isset($_SESSION['est_conducteur_valide']) && $_SESSION['est_conducteur_valide'] ? '(Conducteur validé)' : '' ?> &bull; Voir le profil</div>
+                        <div class="text-xs text-slate-400"><?= ucfirst($_SESSION['user_role']) ?> &bull; Voir le profil</div>
                     </div>
                 </a>
 
                 <a href="<?= $dashboard_link ?>"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-brand-50 transition-all duration-200 group">
-                    <div class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-brand-100 flex items-center justify-center transition-colors flex-shrink-0">
+                    <div class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-brand-100 flex items-center justify-content:center transition-colors flex-shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-500 group-hover:text-brand-600">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
                         </svg>
@@ -193,17 +188,26 @@
                     Mon Dashboard
                 </a>
 
-                <!-- Lien Mes passagers (conducteur uniquement) -->
-                <?php if ($_SESSION['user_role'] == 'conducteur') : ?>
-                    <a href="<?= BASE_URL ?>conducteur/passagers"
-                        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-brand-50 transition-all duration-200 group">
-                        <div class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-brand-100 flex items-center justify-center transition-colors flex-shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-500 group-hover:text-brand-600">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                            </svg>
-                        </div>
-                        Mes passagers
+                <!-- Liens conducteur mobile -->
+                <?php if ($_SESSION['user_role'] == 'conducteur' || in_array('conducteur', $_SESSION['user_roles'] ?? [], true)): ?>
+                    <div class="h-px bg-slate-100 my-1" aria-hidden="true"></div>
+                    <a href="<?= BASE_URL ?>conducteur/trajets"
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-brand-50 transition-all duration-200">
+                        <div class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0">🚗</div>
+                        Mes trajets
                     </a>
+                    <a href="<?= BASE_URL ?>conducteur/reservations"
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-brand-50 transition-all duration-200">
+                        <div class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0">🎫</div>
+                        Réservations en attente
+                    </a>
+                    <a href="<?= BASE_URL ?>conducteur/trajets/nouveau"
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-white transition-all duration-200"
+                        style="background:#f97316; margin: 4px 0;">
+                        <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0" style="font-size:18px;">＋</div>
+                        Nouveau trajet
+                    </a>
+                    <div class="h-px bg-slate-100 my-1" aria-hidden="true"></div>
                 <?php endif; ?>
 
                 <a href="<?= BASE_URL ?>auth/deconnexion"
@@ -233,7 +237,6 @@
 
             <?php endif; ?>
 
-            <!-- Padding bas -->
             <div class="h-2"></div>
         </div>
     </div>
@@ -266,7 +269,6 @@
             }
         });
 
-        // Fermer sur resize vers desktop
         window.addEventListener('resize', () => {
             if (window.innerWidth >= 768 && isOpen) {
                 isOpen = false;

@@ -9,7 +9,9 @@
                 <p style="margin:4px 0 0; color:#64748b;">Consultez les trajets que vous avez publiés.</p>
             </div>
         </div>
-        <a href="<?= BASE_URL ?>conducteur/trajets/nouveau" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:8px;"> <i data-lucide="plus-circle"></i> Nouveau trajet</a>
+        <a href="<?= BASE_URL ?>conducteur/trajets/nouveau" style="display:inline-flex; align-items:center; gap:8px; background:#f97316; color:white; padding:12px 24px; border-radius:12px; text-decoration:none; font-weight:600; font-size:16px; box-shadow:0 4px 12px rgba(249,115,22,0.3); transition:all 0.3s;" onmouseover="this.style.background='#ea580c'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='#f97316'; this.style.transform='translateY(0)';">
+            <i data-lucide="plus-circle" width="20" height="20" style="vertical-align:middle;"></i> Nouveau trajet
+        </a>
     </div>
 
     <?php if(isset($_GET['success']) && $_GET['success'] == 'trajet_annule'): ?>
@@ -54,18 +56,19 @@
                             </div>
                             <p style="color:#475569; margin:0; line-height:1.7;"><?= nl2br(htmlspecialchars($trajet->description ?: 'Aucune description fournie.')) ?></p>
                         </div>
-                        <div style="text-align:right; min-width:180px;">
-                            <div style="font-size: 18px; font-weight: 700; color: #dc2626; margin-bottom: 8px;"><?= number_format($trajet->prix_par_place, 0, ',', ' ') ?> F</div>
-                            <span style="padding: 8px 16px; border-radius: 999px; display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; background:<?= $statutInfo['bg'] ?>; color:<?= $statutInfo['color'] ?>; margin-bottom: 12px;"><?= $statutInfo['label'] ?></span>
+                        <div style="text-align:right; min-width:200px; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
+                            <div style="font-size: 18px; font-weight: 700; color: #dc2626; margin-bottom: 4px;"><?= number_format($trajet->prix_par_place, 0, ',', ' ') ?> F</div>
+                            <span style="padding: 8px 16px; border-radius: 999px; display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; background:<?= $statutInfo['bg'] ?>; color:<?= $statutInfo['color'] ?>;"><?= $statutInfo['label'] ?></span>
 
-                            <a href="<?= BASE_URL ?>conducteur/trajet/<?= $trajet->id ?>/passagers" class="btn btn-outline" style="width:100%; justify-content:center; font-size:13px; padding:8px 12px; margin-bottom: 8px; text-decoration:none;">
-                                <i data-lucide="users" width="14" height="14"></i> Voir les passagers
+                            <!-- Bouton voir les passagers -->
+                            <a href="<?= BASE_URL ?>conducteur/reservations" style="display:inline-flex; align-items:center; justify-content:center; gap:6px; background:#3b82f6; color:white; padding:10px 16px; border-radius:8px; text-decoration:none; font-weight:600; font-size:13px; width:100%; box-sizing:border-box; transition:all 0.3s;" onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#3b82f6'; this.style.transform='translateY(0)';">
+                                <i data-lucide="users" width="14" height="14" style="vertical-align:middle;"></i> Voir les passagers
                             </a>
 
                             <?php if(in_array($trajet->statut, ['planifie', 'en_cours'], true)): ?>
-                                <form action="<?= BASE_URL ?>conducteur/trajet/<?= $trajet->id ?>/annuler" method="POST" onsubmit="return confirm('Annuler ce trajet ? Cette action est irréversible.');">
-                                    <button type="submit" class="btn btn-outline" style="width:100%; justify-content:center; font-size:13px; padding:8px 12px;">
-                                        <i data-lucide="x-circle" width="14" height="14"></i> Annuler
+                                <form action="<?= BASE_URL ?>conducteur/trajet/<?= $trajet->id ?>/annuler" method="POST" onsubmit="return confirm('Annuler ce trajet ? Cette action est irréversible.');" style="width:100%;">
+                                    <button type="submit" style="width:100%; display:flex; align-items:center; justify-content:center; gap:6px; background:#ff4444; color:white; padding:10px 16px; border:none; border-radius:8px; font-weight:600; font-size:13px; cursor:pointer; transition:all 0.3s;" onmouseover="this.style.background='#cc0000'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(255,68,68,0.4)';" onmouseout="this.style.background='#ff4444'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                                        <i data-lucide="x-circle" width="14" height="14" style="vertical-align:middle;"></i> Annuler ce trajet
                                     </button>
                                 </form>
                             <?php endif; ?>
