@@ -49,24 +49,6 @@
                 }
                 ?>
 
-                <!-- Liens conducteur desktop -->
-                <?php if (in_array('conducteur', $roles, true)): ?>
-                    <a href="<?= BASE_URL ?>conducteur/trajets"
-                        class="nav-link group flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-white/70 transition-all duration-200">
-                        🚗 Mes trajets
-                    </a>
-                    <a href="<?= BASE_URL ?>conducteur/reservations"
-                        class="nav-link group flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-white/70 transition-all duration-200">
-                        🎫 Réservations
-                    </a>
-                    <a href="<?= BASE_URL ?>conducteur/trajets/nouveau"
-                        class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-200"
-                        style="background:#f97316; box-shadow:0 2px 8px rgba(249,115,22,0.3);">
-                        ＋ Nouveau trajet
-                    </a>
-                    <div class="w-px h-6 bg-slate-200/80 mx-1" aria-hidden="true"></div>
-                <?php endif; ?>
-
                 <!-- Dashboard icon -->
                 <a href="<?= $dashboard_link ?>"
                     class="p-2.5 rounded-xl text-slate-500 hover:text-brand-600 hover:bg-brand-50 transition-all duration-200"
