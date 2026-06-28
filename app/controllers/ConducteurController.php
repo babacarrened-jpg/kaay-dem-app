@@ -29,6 +29,9 @@ class ConducteurController extends Controller {
      * Affiche le dashboard du conducteur
      */
     public function dashboard() {
+        // Clôture automatique des trajets dont la date/heure est dépassée
+        $this->trajetModel->cloturerTrajetsPasses((int)$_SESSION['user_id']);
+
         $trajets = $this->trajetModel->getByConducteur($_SESSION['user_id']);
         $activeTrajets = array_values(array_filter($trajets, function ($trajet) {
             return in_array($trajet->statut, ['planifie', 'en_cours'], true);
@@ -51,6 +54,7 @@ class ConducteurController extends Controller {
      * Affiche la liste des trajets du conducteur
      */
     public function mesTrajets() {
+        $this->trajetModel->cloturerTrajetsPasses((int)$_SESSION['user_id']);
         $trajets = $this->trajetModel->getByConducteur($_SESSION['user_id']);
 
         $data = [
@@ -280,6 +284,23 @@ class ConducteurController extends Controller {
         }
 
         $this->redirect('conducteur/trajets?error=annulation_impossible');
+    }
+
+    /**
+     * Clôture manuelle d'un trajet par son conducteur (avant l'heure prévue par ex.)
+     */
+    public function terminerTrajet($trajet_id) {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('conducteur/trajets');
+        }
+
+        $ok = $this->trajetModel->terminer((int)$trajet_id, (int)$_SESSION['user_id']);
+
+        if ($ok) {
+            $this->redirect('conducteur/trajets?success=trajet_termine');
+        }
+
+        $this->redirect('conducteur/trajets?error=cloture_impossible');
     }
 
     /**

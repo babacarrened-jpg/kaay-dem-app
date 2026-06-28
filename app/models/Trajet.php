@@ -192,6 +192,41 @@ class Trajet {
     }
 
     /**
+     * Clôture automatiquement tous les trajets passés (date+heure dépassée)
+     * d'un conducteur qui sont encore 'planifie' ou 'en_cours'.
+     * Appelée à chaque affichage du dashboard conducteur.
+     */
+    public function cloturerTrajetsPasses(int $conducteurId): void {
+        $this->db->query("UPDATE trajets
+                          SET statut = 'termine'
+                          WHERE conducteur_id = :conducteur_id
+                          AND statut IN ('planifie', 'en_cours')
+                          AND TIMESTAMP(date_trajet, heure_depart) < NOW()");
+        $this->db->bind(':conducteur_id', $conducteurId);
+        $this->db->execute();
+    }
+
+    /**
+     * Clôture manuelle d'un trajet par son conducteur (le conducteur peut
+     * forcer la clôture même avant l'heure prévue, ex: trajet fini en avance).
+     */
+    public function terminer(int $trajetId, int $conducteurId): bool {
+        $this->db->query("SELECT statut FROM trajets WHERE id = :id AND conducteur_id = :conducteur_id");
+        $this->db->bind(':id', $trajetId);
+        $this->db->bind(':conducteur_id', $conducteurId);
+        $trajet = $this->db->single();
+
+        if (!$trajet || !in_array($trajet->statut, ['planifie', 'en_cours'], true)) {
+            return false;
+        }
+
+        $this->db->query("UPDATE trajets SET statut = 'termine' WHERE id = :id AND conducteur_id = :conducteur_id");
+        $this->db->bind(':id', $trajetId);
+        $this->db->bind(':conducteur_id', $conducteurId);
+        return $this->db->execute();
+    }
+
+    /**
      * Récupérer tous les trajets pour l'admin
      */
     public function getAll(array $filters = []) {

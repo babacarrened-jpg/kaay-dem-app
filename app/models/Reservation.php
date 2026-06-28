@@ -214,7 +214,7 @@ class Reservation implements RepositoryInterface {
     }
 
     public function getDetailById(int $reservation_id, int $passager_id) {
-        $this->db->query("SELECT r.*, t.ville_depart, t.ville_arrivee, t.date_trajet, t.heure_depart, t.places_totales, t.places_disponibles, t.prix_par_place, t.description,
+        $this->db->query("SELECT r.*, t.conducteur_id, t.ville_depart, t.ville_arrivee, t.date_trajet, t.heure_depart, t.places_totales, t.places_disponibles, t.prix_par_place, t.description, t.statut as trajet_statut,
                                  u.nom as conducteur_nom, u.prenom as conducteur_prenom, u.telephone as conducteur_tel, v.marque, v.modele, v.couleur, v.immatriculation
                           FROM reservations r
                           JOIN trajets t ON r.trajet_id = t.id

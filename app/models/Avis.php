@@ -1,7 +1,9 @@
 <?php
 // app/models/Avis.php
 
-class Avis {
+require_once __DIR__ . '/../interfaces/EvaluableInterface.php';
+
+class Avis implements EvaluableInterface {
     private $db;
 
     public function __construct() {
@@ -23,5 +25,29 @@ class Avis {
         $this->db->bind(':destinataire_id', $destinataireId);
         $row = $this->db->single();
         return (float)($row->moyenne ?? 0);
+    }
+
+    /**
+     * Vérifie si un auteur a déjà noté un trajet précis
+     * (empêche de noter deux fois le même trajet)
+     */
+    public function dejaNote(int $trajetId, int $auteurId): bool {
+        $this->db->query('SELECT id FROM avis WHERE trajet_id = :trajet_id AND auteur_id = :auteur_id');
+        $this->db->bind(':trajet_id', $trajetId);
+        $this->db->bind(':auteur_id', $auteurId);
+        return (bool)$this->db->single();
+    }
+
+    /**
+     * Récupère tous les avis reçus par un destinataire (ex: profil conducteur)
+     */
+    public function getByDestinataire(int $destinataireId): array {
+        $this->db->query("SELECT a.*, u.nom as auteur_nom, u.prenom as auteur_prenom
+                          FROM avis a
+                          JOIN utilisateurs u ON u.id = a.auteur_id
+                          WHERE a.destinataire_id = :destinataire_id
+                          ORDER BY a.date_creation DESC");
+        $this->db->bind(':destinataire_id', $destinataireId);
+        return $this->db->resultSet();
     }
 }
