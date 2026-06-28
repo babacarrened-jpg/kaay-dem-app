@@ -187,7 +187,6 @@ class PassagerController extends Controller {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->redirect('passager/dashboard');
         }
-<<<<<<< HEAD
 
         if (empty($_FILES['permis_recto']['name']) || empty($_FILES['permis_verso']['name'])) {
             $this->redirect('passager/devenirConducteur?error=fichiers_manquants');
@@ -286,104 +285,4 @@ class PassagerController extends Controller {
 
         $this->redirect('passager/reservations?error=avis_echec');
     }
-=======
-
-        if (empty($_FILES['permis_recto']['name']) || empty($_FILES['permis_verso']['name'])) {
-            $this->redirect('passager/devenirConducteur?error=fichiers_manquants');
-        }
-
-        $uploadDir = '../public/assets/uploads/permis/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-
-        $rectoExt  = pathinfo($_FILES['permis_recto']['name'], PATHINFO_EXTENSION);
-        $rectoName = 'permis_' . $_SESSION['user_id'] . '_recto_' . time() . '.' . $rectoExt;
-        move_uploaded_file($_FILES['permis_recto']['tmp_name'], $uploadDir . $rectoName);
-
-        $versoExt  = pathinfo($_FILES['permis_verso']['name'], PATHINFO_EXTENSION);
-        $versoName = 'permis_' . $_SESSION['user_id'] . '_verso_' . time() . '.' . $versoExt;
-        move_uploaded_file($_FILES['permis_verso']['tmp_name'], $uploadDir . $versoName);
-
-        $userModel = $this->model('User');
-        $result    = $userModel->demanderConducteur((int)$_SESSION['user_id'], $rectoName, $versoName);
-
-        if ($result) {
-            $this->redirect('passager/dashboard?success=demande_envoyee');
-        } else {
-            $this->redirect('passager/devenirConducteur?error=demande_existante');
-        }
-    }
-
-    /**
- * Formulaire pour laisser un avis
- */
-public function laisserAvis($reservation_id) {
-    $reservation = $this->reservationModel->getDetailById((int)$reservation_id, $_SESSION['user_id']);
-
-    if (!$reservation) {
-        $this->redirect('passager/reservations?error=introuvable');
-    }
-
-    // Vérifications
-    if ($reservation->trajet_statut !== 'termine') {
-        $this->redirect('passager/reservations?error=trajet_non_termine');
-    }
-
-    $avisModel = $this->model('Avis');
-
-    if ($avisModel->dejaNote((int)$reservation->trajet_id, (int)$_SESSION['user_id'])) {
-        $this->redirect('passager/reservations?error=deja_note');
-    }
-
-    $data = [
-        'titre'       => 'Laisser un avis',
-        'reservation' => $reservation
-    ];
-
-    $this->render('passager/laisser_avis', $data);
-}
-
-/**
- * Traitement de l'avis soumis
- */
-public function soumettreAvis($reservation_id) {
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        $this->redirect('passager/reservations');
-    }
-
-    $reservation = $this->reservationModel->getDetailById((int)$reservation_id, $_SESSION['user_id']);
-
-    if (!$reservation || $reservation->trajet_statut !== 'termine') {
-        $this->redirect('passager/reservations?error=impossible');
-    }
-
-    $avisModel = $this->model('Avis');
-
-    if ($avisModel->dejaNote((int)$reservation->trajet_id, (int)$_SESSION['user_id'])) {
-        $this->redirect('passager/reservations?error=deja_note');
-    }
-
-    $note = (int)($_POST['note'] ?? 0);
-    $commentaire = trim($_POST['commentaire'] ?? '');
-
-    if ($note < 1 || $note > 5) {
-        $this->redirect('passager/reservation/' . $reservation_id . '/avis?error=note_invalide');
-    }
-
-    $ok = $avisModel->addRating(
-        (int)$reservation->trajet_id,
-        (int)$_SESSION['user_id'],
-        (int)$reservation->conducteur_id,
-        $note,
-        $commentaire
-    );
-
-    if ($ok) {
-        $this->redirect('passager/reservations?success=avis_envoye');
-    }
-
-    $this->redirect('passager/reservations?error=avis_echec');
-}
->>>>>>> e3a278fcd83fa3d55e48f5b35eea319c1826095f
 }
