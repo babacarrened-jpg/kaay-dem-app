@@ -47,6 +47,27 @@
             </div>
         <?php endif; ?>
 
+        <?php $demandeConducteur = $demandeConducteur ?? null; ?>
+        <?php if ($demandeConducteur && $demandeConducteur->statut === 'en_attente'): ?>
+            <!-- Demande déjà en cours : on affiche le suivi plutôt que le formulaire -->
+            <div class="bg-amber-50 text-amber-800 p-5 rounded-2xl border border-amber-200 flex items-center gap-4">
+                <i data-lucide="clock" width="28" height="28" class="shrink-0"></i>
+                <div>
+                    <p class="font-bold">Votre demande est en cours d'examen</p>
+                    <p class="text-sm mt-1">Envoyée le <?= date('d/m/Y', strtotime($demandeConducteur->date_demande)) ?>. Revenez plus tard, vous serez notifié dès qu'elle sera traitée.</p>
+                </div>
+            </div>
+            <a href="<?= BASE_URL ?>passager/dashboard" class="block text-center mt-6 px-6 py-3.5 rounded-2xl border border-slate-200 text-slate-700 font-bold text-sm bg-white hover:bg-slate-50 transition-colors">
+                Retour au tableau de bord
+            </a>
+        <?php else: ?>
+            <?php if ($demandeConducteur && $demandeConducteur->statut === 'rejetee'): ?>
+                <div class="bg-red-50 text-red-700 p-4 rounded-xl mb-6 flex items-center gap-3 border border-red-200">
+                    <i data-lucide="x-circle" width="20" height="20" class="shrink-0"></i>
+                    <span class="text-sm font-semibold">Votre précédente demande a été refusée. Vérifiez vos documents et réessayez.</span>
+                </div>
+            <?php endif; ?>
+
         <form action="<?= BASE_URL ?>passager/devenirConducteur" method="POST" enctype="multipart/form-data" class="space-y-6">
             
             <div>
@@ -85,5 +106,11 @@
             </div>
 
         </form>
+        <?php endif; ?>
     </div>
 </div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+  lucide.createIcons();
+</script>

@@ -2,6 +2,7 @@
 $userRole = $_SESSION['user_role'] ?? '';
 $isConducteurValide = !empty($_SESSION['est_conducteur_valide']);
 $reservations = $reservations ?? [];
+$demandeConducteur = $demandeConducteur ?? null;
 ?>
 
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -31,22 +32,55 @@ $reservations = $reservations ?? [];
         
         <div class="page-header">
             <?php if($userRole !== 'conducteur' && !$isConducteurValide): ?>
-                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mb-8 flex justify-between items-center">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
-                            </svg>
+                <?php if ($demandeConducteur && $demandeConducteur->statut === 'en_attente'): ?>
+                    <!-- Demande en attente de traitement par l'admin -->
+                    <div class="bg-white rounded-3xl p-6 shadow-sm border border-amber-200 mb-8 flex justify-between items-center">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center">
+                                <i data-lucide="clock" width="24" height="24"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-slate-900">Votre demande est en cours d'examen</p>
+                                <p class="text-sm text-slate-500">Envoyée le <?= date('d/m/Y', strtotime($demandeConducteur->date_demande)) ?>. L'administrateur va valider votre dossier sous peu.</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="font-semibold text-slate-900">Vous voulez conduire ?</p>
-                            <p class="text-sm text-slate-500">Soumettez votre permis, l'admin validera votre profil.</p>
-                        </div>
+                        <span class="status-badge status-pending">En attente</span>
                     </div>
-                    <a href="<?= BASE_URL ?>passager/devenirConducteur" class="px-5 py-2.5 rounded-2xl bg-brand-600 text-white font-semibold text-sm hover:bg-brand-700 transition-colors shadow-sm whitespace-nowrap">
-                        Devenir conducteur
-                    </a>
-                </div>
+                <?php elseif ($demandeConducteur && $demandeConducteur->statut === 'rejetee'): ?>
+                    <!-- Demande refusée : on permet de re-soumettre -->
+                    <div class="bg-white rounded-3xl p-6 shadow-sm border border-red-200 mb-8 flex justify-between items-center">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center">
+                                <i data-lucide="x-circle" width="24" height="24"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-slate-900">Votre demande a été refusée</p>
+                                <p class="text-sm text-slate-500">Vérifiez vos documents et soumettez une nouvelle demande si besoin.</p>
+                            </div>
+                        </div>
+                        <a href="<?= BASE_URL ?>passager/devenirConducteur" class="px-5 py-2.5 rounded-2xl bg-brand-600 text-white font-semibold text-sm hover:bg-brand-700 transition-colors shadow-sm whitespace-nowrap">
+                            Refaire une demande
+                        </a>
+                    </div>
+                <?php else: ?>
+                    <!-- Aucune demande encore envoyée -->
+                    <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mb-8 flex justify-between items-center">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-slate-900">Vous voulez conduire ?</p>
+                                <p class="text-sm text-slate-500">Soumettez votre permis, l'admin validera votre profil.</p>
+                            </div>
+                        </div>
+                        <a href="<?= BASE_URL ?>passager/devenirConducteur" class="px-5 py-2.5 rounded-2xl bg-brand-600 text-white font-semibold text-sm hover:bg-brand-700 transition-colors shadow-sm whitespace-nowrap">
+                            Devenir conducteur
+                        </a>
+                    </div>
+                <?php endif; ?>
             <?php endif; ?>
 
             <?php if(isset($_GET['success']) && $_GET['success'] === 'demande_envoyee'): ?>

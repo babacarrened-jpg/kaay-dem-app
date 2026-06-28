@@ -20,9 +20,14 @@ class PassagerController extends Controller {
     public function dashboard() {
         $reservations = $this->reservationModel->getByPassager($_SESSION['user_id']);
 
+        // Statut de la demande "devenir conducteur" (s'il y en a une), pour affichage du suivi
+        $userModel = $this->model('User');
+        $demandeConducteur = $userModel->getDemandeConducteur((int)$_SESSION['user_id']);
+
         $data = [
             'titre' => 'Mon Espace Passager',
-            'reservations' => $reservations
+            'reservations' => $reservations,
+            'demandeConducteur' => $demandeConducteur
         ];
 
         $this->render('passager/dashboard', $data);
@@ -176,7 +181,13 @@ class PassagerController extends Controller {
             $this->redirect('conducteur/dashboard');
         }
 
-        $data = ['titre' => 'Devenir Conducteur - Kaay Dem !'];
+        $userModel = $this->model('User');
+        $demandeConducteur = $userModel->getDemandeConducteur((int)$_SESSION['user_id']);
+
+        $data = [
+            'titre' => 'Devenir Conducteur - Kaay Dem !',
+            'demandeConducteur' => $demandeConducteur
+        ];
         $this->render('passager/devenir_conducteur', $data);
     }
 
