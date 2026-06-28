@@ -53,6 +53,8 @@ $router->post('/conducteur/trajet/{trajet_id}/terminer', 'ConducteurController',
 $router->get('/conducteur/trajet/{trajet_id}/passagers', 'ConducteurController', 'mesPassagers');
 // Réservations
 $router->get('/conducteur/reservations', 'ConducteurController', 'reservations');
+// ✅ AJOUTER :
+$router->get('/api/conducteur/reservations', 'ConducteurController', 'getReservationsAjax');
 $router->get('/api/conducteur/reservations', 'ConducteurController', 'getReservationsAjax');
 $router->post('/conducteur/reservation/{reservation_id}/accept', 'ConducteurController', 'acceptReservation');
 $router->post('/conducteur/reservation/{reservation_id}/reject', 'ConducteurController', 'rejectReservation');
