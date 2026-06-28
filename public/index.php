@@ -1,5 +1,7 @@
 <?php
 // public/index.php (Front Controller)
+opcache_reset();
+
 session_start();
 
 require_once '../app/config/config.php';

@@ -15,7 +15,7 @@ define('BASE_URL', $protocol . "://" . $domain . $script . '/');
 // Configuration de la Base de Données
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_PASS', 'root');
 define('DB_NAME', 'kaay_dem');
 
 // Dossiers chemins absolus
