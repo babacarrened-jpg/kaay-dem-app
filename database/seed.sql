@@ -3,16 +3,24 @@
 -- ========================================================
 /*conducteur : conducteur123
     passager : passager123             ------------moguini-------
-    admind : admin123@*/
+    admin : admin123@*/
 
 -- Insérer des utilisateurs de test
+-- Conducteurs (est_conducteur_valide = 1)
 INSERT INTO utilisateurs (nom, prenom, email, telephone, mot_de_passe, role, est_conducteur_valide, statut) VALUES
-('Diallo', 'Amadou', 'amadou.diallo@example.com', '+221772345678', '$2y$10$R9q6TSKb4FuDJoF2y2jquewPKdtOg/gO2KHJRnmC3Vyoi..q0.Gea', 'conducteur', TRUE, 'actif'),
-('Diop', 'Saliou', 'saliou.diop@example.com', '+221774567890', '$2y$10$R9q6TSKb4FuDJoF2y2jquewPKdtOg/gO2KHJRnmC3Vyoi..q0.Gea', 'conducteur', TRUE, 'actif'),
-('Fall', 'Khady', 'khady.fall@example.com', '+221775678901', '$2y$10$R9q6TSKb4FuDJoF2y2jquewPKdtOg/gO2KHJRnmC3Vyoi..q0.Gea', 'conducteur', TRUE, 'actif'),
-('Ndiaye', 'Aïssatou', 'aissatou.ndiaye@example.com', '+221783456789', '$2y$10$JriPwa58rpicSm1EU7l59.HwUjSSWEFWOA/YbTfQjmYrqeMXgc6tG', 'passager', FALSE, 'actif'),
-('Seck', 'Moussa', 'moussa.seck@example.com', '+221794567890', '$2y$10$JriPwa58rpicSm1EU7l59.HwUjSSWEFWOA/YbTfQjmYrqeMXgc6tG', 'passager', FALSE, 'actif'),
-('Admin', 'Super', 'admin@example.com', '+221700000000', '$2y$10$U4eH5fZG59Qh4sX8CQ2pJ.Z6y0A9o1f8YBrQ6s5Lx5fKzJj9j7Qm2', 'admin', FALSE, 'actif');
+('Dupont', 'Jean', 'jean.dupont@example.com', '+221770000001', '$2b$10$Bkx5tkjIstT3JYUmQnse3eRUiZnvbFZenq66RZ3pisduTHriS3NJK', 'conducteur', 1, 'actif'),
+('Sarr', 'Fatou', 'fatou.sarr@example.com', '+221770000002', '$2b$10$Bkx5tkjIstT3JYUmQnse3eRUiZnvbFZenq66RZ3pisduTHriS3NJK', 'conducteur', 1, 'actif'),
+('Ba', 'Omar', 'omar.ba@example.com', '+221770000003', '$2b$10$Bkx5tkjIstT3JYUmQnse3eRUiZnvbFZenq66RZ3pisduTHriS3NJK', 'conducteur', 1, 'actif');
+
+-- Passagers
+INSERT INTO utilisateurs (nom, prenom, email, telephone, mot_de_passe, role, est_conducteur_valide, statut) VALUES
+('Faye', 'Aminata', 'aminata.faye@example.com', '+221770000004', '$2b$10$.JMazSMmSm32WvhQJB2LruPPrGnYAu1X43.cbpUrsmccOOPdeoBgy', 'passager', 0, 'actif'),
+('Gueye', 'Ibrahima', 'ibrahima.gueye@example.com', '+221770000005', '$2b$10$.JMazSMmSm32WvhQJB2LruPPrGnYAu1X43.cbpUrsmccOOPdeoBgy', 'passager', 0, 'actif'),
+('Mbaye', 'Rokhaya', 'rokhaya.mbaye@example.com', '+221770000006', '$2b$10$.JMazSMmSm32WvhQJB2LruPPrGnYAu1X43.cbpUrsmccOOPdeoBgy', 'passager', 0, 'actif');
+
+-- Admin
+INSERT INTO utilisateurs (nom, prenom, email, telephone, mot_de_passe, role, est_conducteur_valide, statut) VALUES
+('Admin', 'Kaay', 'admin2@kaaydem.sn', '+221700000002', '$2b$10$fZCKG/ccSt86czzx4/TVcuKvoig9ktaKiOqq85g2hQrExWAcCFpGq', 'admin', 0, 'actif');
 
 -- Insérer des véhicules
 INSERT INTO vehicules (conducteur_id, marque, modele, couleur, immatriculation, nombre_places) VALUES

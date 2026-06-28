@@ -1,3 +1,9 @@
+<?php
+$trajet = $trajet ?? null;
+$message = $message ?? null;
+$alertType = $alertType ?? null;
+?>
+<?php if ($trajet): ?>
 <div style="max-width: 1100px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: 2fr 1fr; gap: 32px;">
     <!-- Colonne Principale -->
     <div>
@@ -127,3 +133,11 @@
         </div>
     </div>
 </div>
+<?php else: ?>
+<div style="max-width: 1100px; margin: 40px auto; padding: 0 20px;">
+    <div class="glass-panel" style="padding: 32px; text-align: center;">
+        <h2 style="margin-bottom: 12px;">Trajet introuvable</h2>
+        <p style="color: #64748b;">Le trajet demandé n’existe pas ou n’est plus disponible.</p>
+    </div>
+</div>
+<?php endif; ?>
