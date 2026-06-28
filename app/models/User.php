@@ -4,6 +4,7 @@
 require_once __DIR__ . '/../interfaces/RepositoryInterface.php';
 
 class User implements RepositoryInterface {
+    
     private $db;
 
     public function __construct() {
@@ -165,4 +166,74 @@ class User implements RepositoryInterface {
         $row = $this->db->single();
         return $row ? (int)$row->total : 0;
     }
+        /**
+     * Recherche d'utilisateurs
+     */
+    public function search(string $term): array {
+        $term = '%' . $term . '%';
+        $this->db->query('SELECT * FROM utilisateurs 
+                          WHERE nom LIKE :term 
+                             OR prenom LIKE :term 
+                             OR email LIKE :term 
+                             OR telephone LIKE :term
+                          ORDER BY id DESC');
+        $this->db->bind(':term', $term);
+        return $this->db->resultSet();
+    }
+
+    /**
+     * Suspend un utilisateur
+     */
+    public function suspend(int $id): bool {
+        $this->db->query('UPDATE utilisateurs SET statut = :statut WHERE id = :id');
+        $this->db->bind(':statut', 'suspendu');
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
+
+    /**
+     * Réactive un utilisateur
+     */
+    public function unsuspend(int $id): bool {
+        $this->db->query('UPDATE utilisateurs SET statut = :statut WHERE id = :id');
+        $this->db->bind(':statut', 'actif');
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
+
+    /**
+     * Met à jour un utilisateur (par l'admin)
+     */
+    public function updateByAdmin(int $id, array $data): bool {
+        $this->db->query('UPDATE utilisateurs 
+                          SET nom = :nom, prenom = :prenom, email = :email, 
+                              telephone = :telephone, role = :role 
+                          WHERE id = :id');
+        $this->db->bind(':id', $id);
+        $this->db->bind(':nom', $data['nom']);
+        $this->db->bind(':prenom', $data['prenom']);
+        $this->db->bind(':email', $data['email']);
+        $this->db->bind(':telephone', $data['telephone']);
+        $this->db->bind(':role', $data['role']);
+        return $this->db->execute();
+    }
+
+    /**
+     * Compte par statut
+     */
+    public function countByStatut(string $statut): int {
+        $this->db->query("SELECT COUNT(*) as total FROM utilisateurs WHERE statut = :statut");
+        $this->db->bind(':statut', $statut);
+        $row = $this->db->single();
+        return $row ? (int)$row->total : 0;
+    }
+
+        public function getCountByStatut(string $statut): int {
+        $this->db->query("SELECT COUNT(*) as total FROM utilisateurs WHERE statut = :statut");
+        $this->db->bind(':statut', $statut);
+        $row = $this->db->single();
+        return $row ? (int)$row->total : 0;
+    }
+
+
 }

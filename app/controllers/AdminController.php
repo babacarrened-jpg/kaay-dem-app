@@ -99,4 +99,115 @@ class AdminController extends Controller {
 
         $this->redirect('admin/dashboard');
     }
+        /**
+     * Liste des utilisateurs avec recherche
+     */
+    // Dans utilisateurs() - lignes 107-116
+    public function utilisateurs() {
+        $search = trim($_GET['search'] ?? '');
+        $users = !empty($search) ? $this->userModel->search($search) : $this->userModel->findAll();
+
+        // Compte les suspendus avec une nouvelle connexion
+        $db = new Database();
+        $db->query("SELECT COUNT(*) as total FROM utilisateurs WHERE statut = 'suspendu'");
+        $row = $db->single();
+        $countSuspendus = $row ? (int)$row->total : 0;
+
+        $data = [
+            'titre' => 'Gestion des utilisateurs',
+            'users' => $users,
+            'search' => $search,
+            'nb_actifs' => $this->userModel->countByStatut('actif'),
+            'nb_suspendus' => $countSuspendus
+        ];
+        $this->render('admin/utilisateurs', $data);
+    }
+
+    /**
+     * Profil détaillé d'un utilisateur
+     */
+    public function voirUtilisateur($id) {
+        $user = $this->userModel->getUserById((int)$id);
+        if(!$user) {
+            $this->redirect('admin/utilisateurs?error=introuvable');
+            return;
+        }
+        $data = ['titre' => 'Profil - ' . $user->prenom . ' ' . $user->nom, 'user' => $user];
+        $this->render('admin/utilisateur_profil', $data);
+    }
+
+    /**
+     * Modifie un utilisateur
+     */
+    public function modifierUtilisateur($id) {
+        $id = (int)$id;
+        if($_SERVER['REQUEST_METHOD'] == 'POST') {
+            if($id === (int)$_SESSION['user_id']) {
+                $this->redirect('admin/voirUtilisateur/' . $id . '?error=auto_modification');
+                return;
+            }
+            $data = [
+                'nom' => trim($_POST['nom'] ?? ''),
+                'prenom' => trim($_POST['prenom'] ?? ''),
+                'email' => trim($_POST['email'] ?? ''),
+                'telephone' => trim($_POST['telephone'] ?? ''),
+                'role' => trim($_POST['role'] ?? 'passager'),
+            ];
+            if($this->userModel->updateByAdmin($id, $data)) {
+                $this->redirect('admin/voirUtilisateur/' . $id . '?success=modifie');
+            } else {
+                $this->redirect('admin/voirUtilisateur/' . $id . '?error=echec');
+            }
+        } else {
+            $this->redirect('admin/voirUtilisateur/' . $id);
+        }
+    }
+
+    /**
+     * Suspend un utilisateur
+     */
+    public function suspendreUtilisateur($id) {
+        $id = (int)$id;
+        if($_SERVER['REQUEST_METHOD'] == 'POST') {
+            if($id === (int)$_SESSION['user_id']) {
+                $this->redirect('admin/voirUtilisateur/' . $id . '?error=auto_suspension');
+                return;
+            }
+            $this->userModel->suspend($id);
+            $this->redirect('admin/voirUtilisateur/' . $id . '?success=suspendu');
+        }
+        $this->redirect('admin/voirUtilisateur/' . $id);
+    }
+
+    /**
+     * Réactive un utilisateur
+     */
+    public function reactiverUtilisateur($id) {
+        $id = (int)$id;
+        if($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $this->userModel->unsuspend($id);
+            $this->redirect('admin/voirUtilisateur/' . $id . '?success=reactive');
+        }
+        $this->redirect('admin/voirUtilisateur/' . $id);
+    }
+
+    /**
+     * Supprime un utilisateur
+     */
+    public function supprimerUtilisateur($id) {
+        $id = (int)$id;
+        if($_SERVER['REQUEST_METHOD'] == 'POST') {
+            if($id === (int)$_SESSION['user_id']) {
+                $this->redirect('admin/utilisateurs?error=auto_suppression');
+                return;
+            }
+            if($this->userModel->delete($id)) {
+                $this->redirect('admin/utilisateurs?success=supprime');
+            } else {
+                $this->redirect('admin/utilisateurs?error=echec_suppression');
+            }
+        }
+        $this->redirect('admin/utilisateurs');
+    }
+
 }

@@ -1,6 +1,6 @@
 <?php
 // public/index.php (Front Controller)
-
+opcache_reset();
 // Démarrage de la session
 session_start();
 
@@ -72,6 +72,14 @@ $router->get('/admin/messages', 'AdminController', 'messages');
 $router->post('/admin/messages/{id}/lu', 'AdminController', 'marquerMessageLu');
 $router->post('/admin/validerConducteur/{id}', 'AdminController', 'validerConducteur');
 $router->post('/admin/refuserConducteur/{id}', 'AdminController', 'refuserConducteur');
+
+// --- Admin : Gestion des utilisateurs ---
+$router->get('/admin/utilisateurs', 'AdminController', 'utilisateurs');
+$router->get('/admin/utilisateur/{id}', 'AdminController', 'voirUtilisateur');
+$router->post('/admin/utilisateur/{id}/modifier', 'AdminController', 'modifierUtilisateur');
+$router->post('/admin/utilisateur/{id}/suspendre', 'AdminController', 'suspendreUtilisateur');
+$router->post('/admin/utilisateur/{id}/reactiver', 'AdminController', 'reactiverUtilisateur');
+$router->post('/admin/utilisateur/{id}/supprimer', 'AdminController', 'supprimerUtilisateur');
 
 // ============================================
 // EXÉCUTION DU ROUTAGE
