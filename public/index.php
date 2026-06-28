@@ -73,6 +73,10 @@ $router->get('/admin/trajets', 'AdminController', 'trajets');
 $router->post('/admin/validerConducteur/{id}', 'AdminController', 'validerConducteur');
 $router->post('/admin/refuserConducteur/{id}', 'AdminController', 'refuserConducteur');
 
+$router->post('/passager/reservation/{reservation_id}/annuler', 'PassagerController', 'annulerReservation');
+// Ajoute cette ligne dans public/index.php (section Conducteur)
+$router->post('/conducteur/trajet/{trajet_id}/terminer', 'ConducteurController', 'terminerTrajet');
+
 
 // ============================================
 // EXÉCUTION DU ROUTAGE

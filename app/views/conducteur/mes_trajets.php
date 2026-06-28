@@ -62,6 +62,21 @@
                                 <i data-lucide="users" width="14" height="14"></i> Voir les passagers
                             </a>
 
+
+                    <form action="<?= BASE_URL ?>conducteur/trajet/<?= $trajet->id ?>/terminer" method="POST"
+      onsubmit="return confirm('Marquer ce trajet comme terminé ?');" style="width:100%;">
+    <button type="submit"
+        style="width:100%; display:flex; align-items:center; justify-content:center; gap:6px;
+               background:#16a34a; color:white; padding:10px 16px; border:none; border-radius:8px;
+               font-weight:600; font-size:13px; cursor:pointer; transition:all 0.3s;"
+        onmouseover="this.style.background='#15803d'; this.style.transform='translateY(-1px)';"
+        onmouseout="this.style.background='#16a34a'; this.style.transform='translateY(0)';">
+        <i data-lucide="check-circle" width="14" height="14" style="vertical-align:middle;"></i>
+        Terminer le trajet
+    </button>
+</form>
+
+
                             <?php if(in_array($trajet->statut, ['planifie', 'en_cours'], true)): ?>
                                 <form action="<?= BASE_URL ?>conducteur/trajet/<?= $trajet->id ?>/annuler" method="POST" onsubmit="return confirm('Annuler ce trajet ? Cette action est irréversible.');">
                                     <button type="submit" class="btn btn-outline" style="width:100%; justify-content:center; font-size:13px; padding:8px 12px;">
