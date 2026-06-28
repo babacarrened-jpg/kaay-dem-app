@@ -68,9 +68,21 @@ $router->post('/admin/messages/{id}/lu', 'AdminController', 'marquerMessageLu');
 $router->post('/admin/validerConducteur/{id}', 'AdminController', 'validerConducteur');
 $router->post('/admin/refuserConducteur/{id}', 'AdminController', 'refuserConducteur');
 
+<<<<<<< HEAD
 // Dans la section --- Passager ---
 $router->get('/passager/devenirConducteur', 'PassagerController', 'devenirConducteurForm');
 $router->post('/passager/devenirConducteur', 'PassagerController', 'devenirConducteur');
+=======
+$router->post('/passager/reservation/{reservation_id}/annuler', 'PassagerController', 'annulerReservation');
+// Ajoute cette ligne dans public/index.php (section Conducteur)
+$router->post('/conducteur/trajet/{trajet_id}/terminer', 'ConducteurController', 'terminerTrajet');
+// Ajouter dans la section --- Passager ---
+$router->get('/passager/reservation/{reservation_id}/avis', 'PassagerController', 'laisserAvis');
+$router->post('/passager/reservation/{reservation_id}/avis', 'PassagerController', 'soumettreAvis');
+
+// Dans la section --- Conducteur ---
+$router->get('/conducteur/avis', 'ConducteurController', 'mesAvis');
+>>>>>>> 58d3db4fb2c01afdc416c23bf1e43e3e97366bf0
 
 
 // ============================================

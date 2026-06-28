@@ -590,133 +590,52 @@
     </div>
  
     <!-- ========== STATISTIQUES : TOP CONDUCTEURS ========== -->
-        <section class="mb-10">
-        <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-
-            <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center">
-                <div>
-                    <h2 class="font-display text-xl font-bold text-slate-900">
-                        🏆 Top Conducteurs
-                    </h2>
-
-                    <p class="text-sm text-slate-500 mt-1">
-                        Classement par nombre total de trajets publiés
-                    </p>
+    <section class="mb-10">
+        <div class="max-w-lg bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">🏆</span>
+                    <div>
+                        <h2 class="font-display text-base font-bold text-slate-900">Top Conducteurs</h2>
+                        <p class="text-xs text-slate-400">Par trajets publiés</p>
+                    </div>
                 </div>
-
-                <span class="bg-brand-50 text-brand-600 text-xs font-bold px-3 py-1 rounded-full">
+                <span class="bg-brand-50 text-brand-600 text-xs font-bold px-2.5 py-1 rounded-full">
                     TOP <?= count($top_conducteurs) ?>
                 </span>
             </div>
-
-            <?php if(empty($top_conducteurs)): ?>
-
-                <div class="p-10 text-center text-slate-400">
-                    Aucun conducteur disponible.
-                </div>
-
-            <?php else: ?>
-
-            <div class="divide-y divide-slate-100">
-
-            <?php
-            $max = max(array_map(fn($c)=>$c->nb_trajets,$top_conducteurs));
-
-            foreach($top_conducteurs as $i=>$c):
-
-                $percent = ($c->nb_trajets/$max)*100;
-
-                switch($i){
-
-                    case 0:
-                        $badge="🥇";
-                        $color="bg-yellow-400";
-                        break;
-
-                    case 1:
-                        $badge="🥈";
-                        $color="bg-slate-400";
-                        break;
-
-                    case 2:
-                        $badge="🥉";
-                        $color="bg-orange-400";
-                        break;
-
-                    default:
-                        $badge="#".($i+1);
-                        $color="bg-brand-500";
-                }
-
-            ?>
-
-            <div class="p-6 hover:bg-slate-50 transition">
-
-                <div class="flex justify-between items-center">
-
-                    <div class="flex items-center gap-4">
-
-                        <div class="w-12 h-12 rounded-full <?= $color ?> text-white flex items-center justify-center font-bold">
-                            <?= $badge ?>
-                        </div>
-
-                        <div>
-
-                            <div class="font-semibold text-slate-900">
-                                <?= htmlspecialchars($c->conducteur) ?>
-                            </div>
-
-                            <div class="text-xs text-slate-500 mt-1">
-
-                                <?= (int)$c->passagers_transportes ?> passagers
-
+            <div class="divide-y divide-slate-50">
+                <?php if (!empty($top_conducteurs)):
+                    $medals = ['🥇','🥈','🥉'];
+                    $maxT   = $top_conducteurs[0]->nb_trajets ?: 1;
+                    foreach ($top_conducteurs as $i => $c):
+                        $pct = round(($c->nb_trajets / $maxT) * 100);
+                ?>
+                <div class="flex items-center gap-4 px-6 py-3 hover:bg-slate-50 transition-colors">
+                    <span class="text-xl w-7 text-center shrink-0"><?= $medals[$i] ?? '#'.($i+1) ?></span>
+                    <div class="w-9 h-9 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-sm shrink-0">
+                        <?= mb_strtoupper(mb_substr(explode(' ', $c->conducteur)[0], 0, 1)) ?>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm font-semibold text-slate-800 truncate"><?= htmlspecialchars($c->conducteur) ?></span>
+                            <div class="flex items-center gap-3 ml-3 shrink-0">
                                 <?php if($c->note_moyenne): ?>
-
-                                    • ⭐ <?= number_format($c->note_moyenne,1) ?>
-
+                                    <span class="text-xs text-yellow-600 font-semibold">⭐ <?= number_format((float)$c->note_moyenne,1) ?></span>
                                 <?php endif; ?>
-
+                                <span class="text-sm font-bold text-brand-600"><?= $c->nb_trajets ?> trajet<?= $c->nb_trajets > 1 ? 's' : '' ?></span>
                             </div>
-
                         </div>
-
+                        <div class="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                            <div class="h-full bg-brand-500 rounded-full" style="width:<?= $pct ?>%"></div>
+                        </div>
+                        <div class="text-xs text-slate-400 mt-1"><?= (int)$c->passagers_transportes ?> passager(s)</div>
                     </div>
-
-                    <div class="text-right">
-
-                        <div class="text-2xl font-bold text-brand-600">
-                            <?= $c->nb_trajets ?>
-                        </div>
-
-                        <div class="text-xs text-slate-400">
-                            trajets
-                        </div>
-
-                    </div>
-
                 </div>
-
-                <div class="mt-4">
-
-                    <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-
-                        <div
-                            class="h-full bg-brand-600 rounded-full"
-                            style="width:<?= $percent ?>%">
-                        </div>
-
-                    </div>
-
-                </div>
-
+                <?php endforeach; else: ?>
+                    <div class="px-6 py-8 text-center text-slate-400 text-sm">Aucun conducteur pour l'instant.</div>
+                <?php endif; ?>
             </div>
-
-            <?php endforeach; ?>
-
-            </div>
-
-            <?php endif; ?>
-
         </div>
     </section>
     <!-- Contenu Principal -->
@@ -814,7 +733,14 @@
 
         <!-- Activité Récente -->
         <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100">
-            <h2 class="font-display text-xl font-bold text-slate-900 mb-6">Flux d'Activité</h2>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="font-display text-xl font-bold text-slate-900">Flux d'Activité</h2>
+                <?php if (!empty($messages_non_lus) && $messages_non_lus > 0): ?>
+                    <span class="bg-brand-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                        <?= $messages_non_lus ?> nouveau<?= $messages_non_lus > 1 ? 'x' : '' ?>
+                    </span>
+                <?php endif; ?>
+            </div>
             <div class="space-y-6">
                 <div class="flex items-start gap-4">
                     <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
@@ -827,7 +753,7 @@
                         <p class="text-xs text-slate-500 mt-1 font-medium">Il y a 10 min</p>
                     </div>
                 </div>
-                
+
                 <div class="flex items-start gap-4">
                     <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
@@ -839,7 +765,7 @@
                         <p class="text-xs text-slate-500 mt-1 font-medium">Il y a 45 min</p>
                     </div>
                 </div>
-                
+
                 <div class="flex items-start gap-4">
                     <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
@@ -851,9 +777,33 @@
                         <p class="text-xs text-slate-500 mt-1 font-medium">Aujourd'hui à 09:12</p>
                     </div>
                 </div>
+
+                <!-- Messages de contact récents -->
+                <?php if (!empty($derniers_messages)): ?>
+                <div class="border-t border-slate-100 pt-4 mt-2">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Messages reçus</p>
+                    <div class="space-y-3">
+                        <?php foreach ($derniers_messages as $msg): ?>
+                        <div class="flex items-start gap-3 <?= !$msg->lu ? 'bg-brand-50 border border-brand-100' : 'bg-slate-50' ?> rounded-xl p-3">
+                            <div class="w-8 h-8 rounded-full <?= !$msg->lu ? 'bg-brand-600 text-white' : 'bg-slate-200 text-slate-500' ?> flex items-center justify-center font-bold text-xs shrink-0">
+                                <?= mb_strtoupper(mb_substr($msg->nom, 0, 1)) ?>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm font-semibold text-slate-900"><?= htmlspecialchars($msg->nom) ?></span>
+                                    <?php if (!$msg->lu): ?><span class="w-1.5 h-1.5 rounded-full bg-brand-600 shrink-0"></span><?php endif; ?>
+                                </div>
+                                <p class="text-xs text-slate-500 truncate"><?= htmlspecialchars(mb_substr($msg->message, 0, 55)) ?>...</p>
+                                <p class="text-xs text-slate-400 mt-0.5"><?= date('d/m à H:i', strtotime($msg->date_envoi)) ?></p>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
-            
-            <a href="#" class="block text-center mt-8 text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors">Voir tout l'historique &rarr;</a>
+
+            <a href="<?= BASE_URL ?>admin/messages" class="block text-center mt-8 text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors">Voir tout l'historique &rarr;</a>
         </div>
     </section>
 

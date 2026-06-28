@@ -95,19 +95,18 @@ class Reservation implements RepositoryInterface {
     /**
      * Récupérer les réservations d'un passager
      */
-    public function getByPassager($passager_id) {
-        $this->db->query("SELECT r.*, t.ville_depart, t.ville_arrivee, t.date_trajet, t.heure_depart,
-                                 u.nom as conducteur_nom, u.prenom as conducteur_prenom
-                          FROM reservations r
-                          JOIN trajets t ON r.trajet_id = t.id
-                          JOIN utilisateurs u ON t.conducteur_id = u.id
-                          WHERE r.passager_id = :passager_id
-                          ORDER BY t.date_trajet DESC");
-        $this->db->bind(':passager_id', $passager_id);
-        
-        return $this->db->resultSet();
-    }
-
+   public function getByPassager($passager_id) {
+    $this->db->query("SELECT r.*, t.ville_depart, t.ville_arrivee, t.date_trajet, t.heure_depart,
+                             t.statut as trajet_statut, t.conducteur_id,
+                             u.nom as conducteur_nom, u.prenom as conducteur_prenom
+                      FROM reservations r
+                      JOIN trajets t ON r.trajet_id = t.id
+                      JOIN utilisateurs u ON t.conducteur_id = u.id
+                      WHERE r.passager_id = :passager_id
+                      ORDER BY t.date_trajet DESC");
+    $this->db->bind(':passager_id', $passager_id);
+    return $this->db->resultSet();
+}
     /**
      * Récupérer les réservations en attente pour un conducteur (pour ses trajets)
      */
