@@ -37,14 +37,14 @@ abstract class Controller {
         ob_start();
         $viewFile = "../app/views/" . $viewName . ".php";
         if (file_exists($viewFile)) {
-            require_once $viewFile;
+            require $viewFile;
         } else {
             die("La vue " . $viewName . " n'existe pas.");
         }
         $content = ob_get_clean();
         
         // On charge le layout qui va injecter la variable $content
-        require_once "../app/views/layouts/" . $layout . ".php";
+        require "../app/views/layouts/" . $layout . ".php";
     }
 
     /**

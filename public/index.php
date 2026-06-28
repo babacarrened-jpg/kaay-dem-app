@@ -1,4 +1,9 @@
 <?php
+
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+// ... le reste du code existant
 // public/index.php (Front Controller)
 
 // Démarrage de la session
