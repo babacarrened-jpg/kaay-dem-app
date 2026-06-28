@@ -21,6 +21,7 @@ $router = new Router();
 $router->get('/', 'HomeController', 'index');
 $router->get('/a-propos', 'HomeController', 'about');
 $router->get('/contact', 'HomeController', 'contact');
+$router->post('/contact/envoyer', 'HomeController', 'envoyerContact');
 
 // --- Auth ---
 $router->get('/auth/connexion', 'AuthController', 'loginForm');
@@ -28,12 +29,6 @@ $router->post('/auth/connexion', 'AuthController', 'login');
 $router->get('/auth/inscription', 'AuthController', 'registerForm');
 $router->post('/auth/inscription', 'AuthController', 'register');
 $router->get('/auth/deconnexion', 'AuthController', 'logout');
-
-// --- Nouvelles Routes : Mot de passe oublié ---
-$router->get('/auth/mot-de-passe-oublie', 'AuthController', 'motDePasseOublie');
-$router->post('/auth/mot-de-passe-oublie', 'AuthController', 'motDePasseOublie');
-$router->get('/auth/reinitialiser-mot-de-passe', 'AuthController', 'reinitialiserMotDePasse');
-$router->post('/auth/reinitialiser-mot-de-passe', 'AuthController', 'reinitialiserMotDePasse');
 
 // --- Trajets (Recherche & Détails) ---
 $router->get('/trajets/recherche', 'TrajetController', 'searchForm');
@@ -46,8 +41,6 @@ $router->get('/passager/reservations', 'PassagerController', 'reservations');
 $router->get('/passager/reservation/{id}', 'PassagerController', 'reservation');
 $router->get('/passager/reserver/{trajet_id}', 'PassagerController', 'reserverTrajet');
 $router->post('/passager/reserver/{trajet_id}', 'PassagerController', 'reserverTrajet');
-$router->get('/passager/devenirConducteur', 'PassagerController', 'devenirConducteurForm');
-$router->post('/passager/devenirConducteur', 'PassagerController', 'devenirConducteur');
 
 // --- Conducteur ---
 $router->get('/conducteur/dashboard', 'ConducteurController', 'dashboard');
@@ -70,21 +63,26 @@ $router->get('/profil', 'ProfilController', 'index');
 // --- Admin ---
 $router->get('/admin/dashboard', 'AdminController', 'dashboard');
 $router->get('/admin/trajets', 'AdminController', 'trajets');
+$router->get('/admin/messages', 'AdminController', 'messages');
+$router->post('/admin/messages/{id}/lu', 'AdminController', 'marquerMessageLu');
 $router->post('/admin/validerConducteur/{id}', 'AdminController', 'validerConducteur');
 $router->post('/admin/refuserConducteur/{id}', 'AdminController', 'refuserConducteur');
 
-$router->post('/passager/reservation/{reservation_id}/annuler', 'PassagerController', 'annulerReservation');
-// Ajoute cette ligne dans public/index.php (section Conducteur)
-$router->post('/conducteur/trajet/{trajet_id}/terminer', 'ConducteurController', 'terminerTrajet');
+// Dans la section --- Passager ---
+$router->get('/passager/devenirConducteur', 'PassagerController', 'devenirConducteurForm');
+$router->post('/passager/devenirConducteur', 'PassagerController', 'devenirConducteur');
 
 
 // ============================================
 // EXÉCUTION DU ROUTAGE
 // ============================================
 
-// Obtenir l'URI demandée
 $uri = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Lancement du Dispatcher
+// Si passage via ?url=
+if (!empty($_GET['url'])) {
+    $uri = '/' . trim($_GET['url'], '/');
+}
+
 $router->dispatch($uri, $method);
