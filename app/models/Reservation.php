@@ -39,7 +39,6 @@ class Reservation implements RepositoryInterface {
             // de l'accepter ou de la refuser (cycle de vie défini par le sujet).
             $status = ReservationStatus::EN_ATTENTE->value;
 
-
             $this->db->query("SELECT id FROM reservations WHERE passager_id = :passager_id AND trajet_id = :trajet_id AND statut IN ('en_attente', 'confirmee')");
             $this->db->bind(':passager_id', $passager_id);
             $this->db->bind(':trajet_id', $trajet_id);
@@ -279,9 +278,10 @@ class Reservation implements RepositoryInterface {
         $this->db->bind(':id', $id);
         return $this->db->execute();
     }
+
     /**
- * Récupère tous les passagers des trajets d'un conducteur
- */
+     * Récupère tous les passagers des trajets d'un conducteur
+     */
     public function getPassagersByConducteur(int $conducteur_id): array {
         $this->db->query("SELECT 
                             u.id, u.nom, u.prenom, u.email, u.telephone, u.photo_profil,
@@ -297,6 +297,30 @@ class Reservation implements RepositoryInterface {
                         JOIN trajets t ON t.id = r.trajet_id
                         WHERE t.conducteur_id = :conducteur_id
                         ORDER BY r.date_reservation DESC");
+        $this->db->bind(':conducteur_id', $conducteur_id);
+        return $this->db->resultSet();
+    }
+
+    /**
+     * Récupère les passagers d'un trajet précis, en vérifiant que ce trajet
+     * appartient bien au conducteur connecté (sécurité : pas d'accès croisé).
+     */
+    public function getPassagersByTrajet(int $trajet_id, int $conducteur_id): array {
+        $this->db->query("SELECT
+                            u.id, u.nom, u.prenom, u.email, u.telephone, u.photo_profil,
+                            r.id AS reservation_id,
+                            r.places_reservees, r.prix_total,
+                            r.statut AS reservation_statut,
+                            r.date_reservation,
+                            t.id AS trajet_id,
+                            t.ville_depart, t.ville_arrivee,
+                            t.date_trajet, t.heure_depart
+                        FROM reservations r
+                        JOIN utilisateurs u ON u.id = r.passager_id
+                        JOIN trajets t ON t.id = r.trajet_id
+                        WHERE t.id = :trajet_id AND t.conducteur_id = :conducteur_id
+                        ORDER BY r.date_reservation DESC");
+        $this->db->bind(':trajet_id', $trajet_id);
         $this->db->bind(':conducteur_id', $conducteur_id);
         return $this->db->resultSet();
     }

@@ -281,11 +281,25 @@ class ConducteurController extends Controller {
 
         $this->redirect('conducteur/trajets?error=annulation_impossible');
     }
-    public function mesPassagers() {
-        $passagers = $this->reservationModel->getPassagersByConducteur((int)$_SESSION['user_id']);
+
+    /**
+     * Affiche les passagers d'un trajet précis (vérifie que ce trajet
+     * appartient bien au conducteur connecté)
+     */
+    public function mesPassagers($trajet_id) {
+        $conducteurId = (int)$_SESSION['user_id'];
+        $trajetId = (int)$trajet_id;
+
+        $trajet = $this->trajetModel->getById($trajetId);
+        if (!$trajet || (int)$trajet->conducteur_id !== $conducteurId) {
+            die('Accès refusé.');
+        }
+
+        $passagers = $this->reservationModel->getPassagersByTrajet($trajetId, $conducteurId);
 
         $data = [
-            'titre' => 'Mes passagers',
+            'titre' => 'Passagers du trajet',
+            'trajet' => $trajet,
             'passagers' => $passagers
         ];
 

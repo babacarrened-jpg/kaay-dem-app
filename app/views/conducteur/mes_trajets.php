@@ -58,6 +58,10 @@
                             <div style="font-size: 18px; font-weight: 700; color: #dc2626; margin-bottom: 8px;"><?= number_format($trajet->prix_par_place, 0, ',', ' ') ?> F</div>
                             <span style="padding: 8px 16px; border-radius: 999px; display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; background:<?= $statutInfo['bg'] ?>; color:<?= $statutInfo['color'] ?>; margin-bottom: 12px;"><?= $statutInfo['label'] ?></span>
 
+                            <a href="<?= BASE_URL ?>conducteur/trajet/<?= $trajet->id ?>/passagers" class="btn btn-outline" style="width:100%; justify-content:center; font-size:13px; padding:8px 12px; margin-bottom: 8px; text-decoration:none;">
+                                <i data-lucide="users" width="14" height="14"></i> Voir les passagers
+                            </a>
+
                             <?php if(in_array($trajet->statut, ['planifie', 'en_cours'], true)): ?>
                                 <form action="<?= BASE_URL ?>conducteur/trajet/<?= $trajet->id ?>/annuler" method="POST" onsubmit="return confirm('Annuler ce trajet ? Cette action est irréversible.');">
                                     <button type="submit" class="btn btn-outline" style="width:100%; justify-content:center; font-size:13px; padding:8px 12px;">
