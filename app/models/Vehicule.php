@@ -39,6 +39,16 @@ class Vehicule implements RepositoryInterface {
     }
 
     /**
+ * Compter les véhicules d'un conducteur
+ */
+public function countByConducteur(int $conducteurId): int {
+    $this->db->query('SELECT COUNT(*) as total FROM vehicules WHERE conducteur_id = :conducteur_id');
+    $this->db->bind(':conducteur_id', $conducteurId);
+    $row = $this->db->single();
+    return $row ? (int)$row->total : 0;
+}
+
+    /**
      * Ajouter un nouveau véhicule pour un conducteur
      */
     public function ajouter(int $conducteurId, array $data): bool {
