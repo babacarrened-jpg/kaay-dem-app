@@ -1,14 +1,21 @@
 <?php
 // public/index.php (Front Controller)
 
+// Démarrage de la session
 session_start();
 
+// Chargement des fichiers de configuration et du cœur de l'application
 require_once '../app/config/config.php';
 require_once '../app/core/Database.php';
 require_once '../app/core/Controller.php';
 require_once '../app/core/Router.php';
 
+// Initialisation du routeur
 $router = new Router();
+
+// ============================================
+// DÉFINITION DES ROUTES
+// ============================================
 
 // --- Pages Publiques ---
 $router->get('/', 'HomeController', 'index');
@@ -23,7 +30,7 @@ $router->get('/auth/inscription', 'AuthController', 'registerForm');
 $router->post('/auth/inscription', 'AuthController', 'register');
 $router->get('/auth/deconnexion', 'AuthController', 'logout');
 
-// --- Trajets ---
+// --- Trajets (Recherche & Détails) ---
 $router->get('/trajets/recherche', 'TrajetController', 'searchForm');
 $router->get('/trajets/resultats', 'TrajetController', 'searchResults');
 $router->get('/trajets/detail/{id}', 'TrajetController', 'detail');
@@ -34,12 +41,6 @@ $router->get('/passager/reservations', 'PassagerController', 'reservations');
 $router->get('/passager/reservation/{id}', 'PassagerController', 'reservation');
 $router->get('/passager/reserver/{trajet_id}', 'PassagerController', 'reserverTrajet');
 $router->post('/passager/reserver/{trajet_id}', 'PassagerController', 'reserverTrajet');
-$router->get('/passager/devenirConducteur', 'PassagerController', 'devenirConducteurForm');
-$router->post('/passager/devenirConducteur', 'PassagerController', 'devenirConducteur');
-$router->post('/passager/reservation/{reservation_id}/annuler', 'PassagerController', 'annulerReservation');
-// ✅ Avis
-$router->get('/passager/reservation/{reservation_id}/avis', 'PassagerController', 'laisserAvis');
-$router->post('/passager/reservation/{reservation_id}/avis', 'PassagerController', 'soumettreAvis');
 
 // --- Conducteur ---
 $router->get('/conducteur/dashboard', 'ConducteurController', 'dashboard');
@@ -49,17 +50,12 @@ $router->post('/conducteur/trajets/nouveau', 'ConducteurController', 'creerTraje
 $router->get('/conducteur/vehicule/nouveau', 'ConducteurController', 'nouveauVehiculeForm');
 $router->post('/conducteur/vehicule/nouveau', 'ConducteurController', 'creerVehicule');
 $router->post('/conducteur/trajet/{trajet_id}/annuler', 'ConducteurController', 'annulerTrajet');
-$router->post('/conducteur/trajet/{trajet_id}/terminer', 'ConducteurController', 'terminerTrajet');
 $router->get('/conducteur/trajet/{trajet_id}/passagers', 'ConducteurController', 'mesPassagers');
-// Réservations
+
+// Gestion des réservations pour conducteurs
 $router->get('/conducteur/reservations', 'ConducteurController', 'reservations');
-// ✅ AJOUTER :
-$router->get('/api/conducteur/reservations', 'ConducteurController', 'getReservationsAjax');
-$router->get('/api/conducteur/reservations', 'ConducteurController', 'getReservationsAjax');
 $router->post('/conducteur/reservation/{reservation_id}/accept', 'ConducteurController', 'acceptReservation');
 $router->post('/conducteur/reservation/{reservation_id}/reject', 'ConducteurController', 'rejectReservation');
-// ✅ Avis conducteur
-$router->get('/conducteur/avis', 'ConducteurController', 'mesAvis');
 
 // --- Profil ---
 $router->get('/profil', 'ProfilController', 'index');
@@ -72,10 +68,26 @@ $router->post('/admin/messages/{id}/lu', 'AdminController', 'marquerMessageLu');
 $router->post('/admin/validerConducteur/{id}', 'AdminController', 'validerConducteur');
 $router->post('/admin/refuserConducteur/{id}', 'AdminController', 'refuserConducteur');
 
+// Dans la section --- Passager ---
+$router->get('/passager/devenirConducteur', 'PassagerController', 'devenirConducteurForm');
+$router->post('/passager/devenirConducteur', 'PassagerController', 'devenirConducteur');
+$router->post('/passager/reservation/{reservation_id}/annuler', 'PassagerController', 'annulerReservation');
+$router->get('/passager/reservation/{reservation_id}/avis', 'PassagerController', 'laisserAvis');
+$router->post('/passager/reservation/{reservation_id}/avis', 'PassagerController', 'soumettreAvis');
+
+// Dans la section --- Conducteur ---
+$router->post('/conducteur/trajet/{trajet_id}/terminer', 'ConducteurController', 'terminerTrajet');
+$router->get('/conducteur/avis', 'ConducteurController', 'mesAvis');
+
+
 // ============================================
+// EXÉCUTION DU ROUTAGE
+// ============================================
+
 $uri = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];
 
+// Si passage via ?url=
 if (!empty($_GET['url'])) {
     $uri = '/' . trim($_GET['url'], '/');
 }

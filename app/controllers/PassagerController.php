@@ -34,9 +34,20 @@ class PassagerController extends Controller {
     public function reservations() {
         $reservations = $this->reservationModel->getByPassager($_SESSION['user_id']);
 
+        // Pré-calculer quels trajets ont déjà été notés par ce passager
+        // (fait ici car la vue ne peut pas charger les modèles directement)
+        $avisModel = $this->model('Avis');
+        $trajetsDejaNote = [];
+        foreach (($reservations ?? []) as $res) {
+            if ($avisModel->dejaNote((int)$res->trajet_id, (int)$_SESSION['user_id'])) {
+                $trajetsDejaNote[] = (int)$res->trajet_id;
+            }
+        }
+
         $data = [
             'titre' => 'Mes réservations',
-            'reservations' => $reservations
+            'reservations' => $reservations,
+            'trajetsDejaNote' => $trajetsDejaNote
         ];
 
         $this->render('passager/reservations', $data);
@@ -205,73 +216,73 @@ class PassagerController extends Controller {
     }
 
     /**
- * Formulaire pour laisser un avis
- */
-public function laisserAvis($reservation_id) {
-    $reservation = $this->reservationModel->getDetailById((int)$reservation_id, $_SESSION['user_id']);
+     * Formulaire pour laisser un avis
+     */
+    public function laisserAvis($reservation_id) {
+        $reservation = $this->reservationModel->getDetailById((int)$reservation_id, $_SESSION['user_id']);
 
-    if (!$reservation) {
-        $this->redirect('passager/reservations?error=introuvable');
+        if (!$reservation) {
+            $this->redirect('passager/reservations?error=introuvable');
+        }
+
+        // Vérifications
+        if ($reservation->trajet_statut !== 'termine') {
+            $this->redirect('passager/reservations?error=trajet_non_termine');
+        }
+
+        $avisModel = $this->model('Avis');
+
+        if ($avisModel->dejaNote((int)$reservation->trajet_id, (int)$_SESSION['user_id'])) {
+            $this->redirect('passager/reservations?error=deja_note');
+        }
+
+        $data = [
+            'titre'       => 'Laisser un avis',
+            'reservation' => $reservation
+        ];
+
+        $this->render('passager/laisser_avis', $data);
     }
 
-    // Vérifications
-    if ($reservation->trajet_statut !== 'termine') {
-        $this->redirect('passager/reservations?error=trajet_non_termine');
+    /**
+     * Traitement de l'avis soumis
+     */
+    public function soumettreAvis($reservation_id) {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('passager/reservations');
+        }
+
+        $reservation = $this->reservationModel->getDetailById((int)$reservation_id, $_SESSION['user_id']);
+
+        if (!$reservation || $reservation->trajet_statut !== 'termine') {
+            $this->redirect('passager/reservations?error=impossible');
+        }
+
+        $avisModel = $this->model('Avis');
+
+        if ($avisModel->dejaNote((int)$reservation->trajet_id, (int)$_SESSION['user_id'])) {
+            $this->redirect('passager/reservations?error=deja_note');
+        }
+
+        $note = (int)($_POST['note'] ?? 0);
+        $commentaire = trim($_POST['commentaire'] ?? '');
+
+        if ($note < 1 || $note > 5) {
+            $this->redirect('passager/reservation/' . $reservation_id . '/avis?error=note_invalide');
+        }
+
+        $ok = $avisModel->addRating(
+            (int)$reservation->trajet_id,
+            (int)$_SESSION['user_id'],
+            (int)$reservation->conducteur_id,
+            $note,
+            $commentaire
+        );
+
+        if ($ok) {
+            $this->redirect('passager/reservations?success=avis_envoye');
+        }
+
+        $this->redirect('passager/reservations?error=avis_echec');
     }
-
-    $avisModel = $this->model('Avis');
-
-    if ($avisModel->dejaNote((int)$reservation->trajet_id, (int)$_SESSION['user_id'])) {
-        $this->redirect('passager/reservations?error=deja_note');
-    }
-
-    $data = [
-        'titre'       => 'Laisser un avis',
-        'reservation' => $reservation
-    ];
-
-    $this->render('passager/laisser_avis', $data);
-}
-
-/**
- * Traitement de l'avis soumis
- */
-public function soumettreAvis($reservation_id) {
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        $this->redirect('passager/reservations');
-    }
-
-    $reservation = $this->reservationModel->getDetailById((int)$reservation_id, $_SESSION['user_id']);
-
-    if (!$reservation || $reservation->trajet_statut !== 'termine') {
-        $this->redirect('passager/reservations?error=impossible');
-    }
-
-    $avisModel = $this->model('Avis');
-
-    if ($avisModel->dejaNote((int)$reservation->trajet_id, (int)$_SESSION['user_id'])) {
-        $this->redirect('passager/reservations?error=deja_note');
-    }
-
-    $note = (int)($_POST['note'] ?? 0);
-    $commentaire = trim($_POST['commentaire'] ?? '');
-
-    if ($note < 1 || $note > 5) {
-        $this->redirect('passager/reservation/' . $reservation_id . '/avis?error=note_invalide');
-    }
-
-    $ok = $avisModel->addRating(
-        (int)$reservation->trajet_id,
-        (int)$_SESSION['user_id'],
-        (int)$reservation->conducteur_id,
-        $note,
-        $commentaire
-    );
-
-    if ($ok) {
-        $this->redirect('passager/reservations?success=avis_envoye');
-    }
-
-    $this->redirect('passager/reservations?error=avis_echec');
-}
 }

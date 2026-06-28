@@ -1,12 +1,6 @@
 <?php
-// Charger les avis déjà laissés par ce passager (pour cacher le bouton si déjà noté)
-$avisModel = new Avis();
-$trajetsDejaNote = [];
-foreach(($reservations ?? []) as $res) {
-    if ($avisModel->dejaNote((int)$res->trajet_id, (int)$_SESSION['user_id'])) {
-        $trajetsDejaNote[] = (int)$res->trajet_id;
-    }
-}
+// trajetsDejaNote est calculé et fourni par le contrôleur (PassagerController::reservations())
+$trajetsDejaNote = $trajetsDejaNote ?? [];
 ?>
 
 <div style="max-width: 1100px; margin: 40px auto; padding: 0 20px;">
