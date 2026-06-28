@@ -300,4 +300,44 @@ class Reservation implements RepositoryInterface {
         $row = $this->db->single();
         return $row ? (int)$row->total : 0;
     }
+
+    public function getAllWithDetails(array $filters = []): array {
+        $where = [];
+        if (!empty($filters['statut'])) {
+            $where[] = "r.statut = :statut";
+        }
+        if (!empty($filters['search'])) {
+            $where[] = "(p.nom LIKE :search OR p.prenom LIKE :search OR c.nom LIKE :search OR c.prenom LIKE :search OR t.ville_depart LIKE :search OR t.ville_arrivee LIKE :search)";
+        }
+
+        $sql = "SELECT r.id, r.statut, r.places_reservees, r.prix_total, r.date_reservation,
+                       p.id as passager_id, p.nom as passager_nom, p.prenom as passager_prenom, p.email as passager_email,
+                       c.id as conducteur_id, c.nom as conducteur_nom, c.prenom as conducteur_prenom, c.email as conducteur_email,
+                       t.id as trajet_id, t.ville_depart, t.ville_arrivee, t.date_trajet, t.heure_depart
+                FROM reservations r
+                JOIN utilisateurs p ON r.passager_id = p.id
+                JOIN trajets t ON r.trajet_id = t.id
+                JOIN utilisateurs c ON t.conducteur_id = c.id";
+
+        if (!empty($where)) {
+            $sql .= " WHERE " . implode(" AND ", $where);
+        }
+        $sql .= " ORDER BY r.date_reservation DESC";
+
+        $this->db->query($sql);
+        if (!empty($filters['statut'])) {
+            $this->db->bind(':statut', $filters['statut']);
+        }
+        if (!empty($filters['search'])) {
+            $this->db->bind(':search', '%' . $filters['search'] . '%');
+        }
+        return $this->db->resultSet();
+    }
+
+    public function countByStatut(string $statut): int {
+        $this->db->query("SELECT COUNT(*) as total FROM reservations WHERE statut = :statut");
+        $this->db->bind(':statut', $statut);
+        $row = $this->db->single();
+        return $row ? (int)$row->total : 0;
+    }
 }

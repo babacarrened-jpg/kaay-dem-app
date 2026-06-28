@@ -104,7 +104,7 @@
                 </button>
 
                 <?php if($user->statut === 'actif'): ?>
-                <form action="<?= BASE_URL ?>admin/suspendreUtilisateur/<?= $user->id ?>" method="POST" class="m-0"
+                <form action="<?= BASE_URL ?>admin/utilisateur/<?= $user->id ?>/suspendre" method="POST" class="m-0"
                       onsubmit="return confirm('Suspendre cet utilisateur ? Il ne pourra plus se connecter.');">
                     <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-yellow-50 text-yellow-700 text-sm font-semibold hover:bg-yellow-500 hover:text-white transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
@@ -114,7 +114,7 @@
                     </button>
                 </form>
                 <?php else: ?>
-                <form action="<?= BASE_URL ?>admin/reactiverUtilisateur/<?= $user->id ?>" method="POST" class="m-0">
+                <form action="<?= BASE_URL ?>admin/utilisateur/<?= $user->id ?>/reactiver" method="POST" class="m-0">
                     <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-green-50 text-green-700 text-sm font-semibold hover:bg-green-500 hover:text-white transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -124,7 +124,7 @@
                 </form>
                 <?php endif; ?>
 
-                <form action="<?= BASE_URL ?>admin/supprimerUtilisateur/<?= $user->id ?>" method="POST" class="m-0"
+                <form action="<?= BASE_URL ?>admin/utilisateur/<?= $user->id ?>/supprimer" method="POST" class="m-0"
                       onsubmit="return confirm('ATTENTION : Cette action est irréversible. Supprimer définitivement cet utilisateur ?');">
                     <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-red-50 text-red-700 text-sm font-semibold hover:bg-red-500 hover:text-white transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
@@ -140,7 +140,7 @@
     <!-- Formulaire d'édition (caché par défaut) -->
     <div id="edit-form" class="hidden bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
         <h2 class="font-display text-xl font-bold text-slate-900 mb-6">Modifier les informations</h2>
-        <form action="<?= BASE_URL ?>admin/modifierUtilisateur/<?= $user->id ?>" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <form action="<?= BASE_URL ?>admin/utilisateur/<?= $user->id ?>/modifier" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
                 <label class="block text-sm font-semibold text-slate-700 mb-2">Nom</label>
                 <input type="text" name="nom" value="<?= htmlspecialchars($user->nom) ?>" required

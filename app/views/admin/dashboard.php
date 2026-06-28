@@ -45,6 +45,12 @@
             </svg>
             Gestion utilisateurs
         </a>
+        <a href="<?= BASE_URL ?>admin/reservations" class="inline-flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+            </svg>
+            Gestion réservations
+        </a>
         <a href="<?= BASE_URL ?>admin/trajets" class="inline-flex items-center gap-2 rounded-2xl bg-brand-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 transition-colors">
             Voir tous les trajets
         </a>
@@ -698,8 +704,8 @@
                     </div>
                 </div>
             </div>
-            <a href="#" class="block text-center mt-8 text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors">Voir tout l'historique &rarr;</a>
-        </div>
+                <a href="<?= BASE_URL ?>admin/historique" class="block text-center mt-8 text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors">Voir tout l'historique &rarr;</a>        
+            </div>
     </section>
 
-</div>
+</div>  

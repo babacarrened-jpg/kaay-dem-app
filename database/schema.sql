@@ -126,3 +126,21 @@ CREATE TABLE notifications (
     date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS messages_contact (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nom VARCHAR(150) NOT NULL,
+    email VARCHAR(150) NOT NULL,
+    message TEXT NOT NULL,
+    lu BOOLEAN DEFAULT FALSE,
+    date_envoi DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS activites (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    type        VARCHAR(50)  NOT NULL,
+    description TEXT         NOT NULL,
+    user_id     INT          NULL,
+    created_at  DATETIME     DEFAULT NOW(),
+    FOREIGN KEY (user_id) REFERENCES utilisateurs(id) ON DELETE SET NULL
+);

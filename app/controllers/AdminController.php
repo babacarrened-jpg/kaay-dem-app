@@ -10,7 +10,6 @@ class AdminController extends Controller {
             $this->redirect('auth/connexion');
         }
 
-        // Sécurité : Seul l'admin peut accéder à ce contrôleur
         $roles = $_SESSION['user_roles'] ?? [$_SESSION['user_role'] ?? ''];
         if(!in_array('admin', $roles, true)) {
             die("Accès non autorisé. Vous devez être administrateur.");
@@ -20,15 +19,11 @@ class AdminController extends Controller {
         $this->trajetModel = $this->model('Trajet');
     }
 
-    /**
-     * Affiche le dashboard d'administration
-     */
     public function dashboard() {
         $demandes = $this->userModel->getPendingConducteurRequests();
         $allTrajets = $this->trajetModel->getAll();
         $reservationModel = $this->model('Reservation');
 
-        // --- Nouvelles statistiques ---
         $trajetsByMonth    = $this->trajetModel->getTrajetsByMonth();
         $tauxOccupation    = $this->trajetModel->getTauxOccupationByMonth();
         $topConducteurs    = $this->trajetModel->getTopConducteurs(5);
@@ -57,75 +52,72 @@ class AdminController extends Controller {
  
     public function trajets() {
         $filters = [
-            'statut' => $_GET['statut'] ?? '',
+            'statut'        => $_GET['statut'] ?? '',
             'conducteur_id' => isset($_GET['conducteur_id']) && is_numeric($_GET['conducteur_id']) ? (int)$_GET['conducteur_id'] : '',
-            'ville_depart' => trim($_GET['ville_depart'] ?? ''),
+            'ville_depart'  => trim($_GET['ville_depart'] ?? ''),
             'ville_arrivee' => trim($_GET['ville_arrivee'] ?? '')
         ];
 
         $conducteurs = $this->userModel->getConducteurs();
-        $trajets = $this->trajetModel->getAll($filters);
+        $trajets     = $this->trajetModel->getAll($filters);
 
         $data = [
-            'titre' => 'Tous les trajets',
-            'trajets' => $trajets,
+            'titre'       => 'Tous les trajets',
+            'trajets'     => $trajets,
             'conducteurs' => $conducteurs,
-            'filters' => $filters
+            'filters'     => $filters
         ];
 
         $this->render('admin/trajets', $data);
     }
 
-    /**
-     * Valide un conducteur
-     */
     public function validerConducteur($id) {
         if($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $user = $this->userModel->getUserById((int)$id);
             $this->userModel->validateConducteur((int)$id, (int)$_SESSION['user_id']);
+
+            $activiteModel = $this->model('Activite');
+            $nom = $user ? $user->prenom . ' ' . $user->nom : '#' . $id;
+            $activiteModel->loguer('conducteur_valide', 'Conducteur ' . $nom . ' validé.', $_SESSION['user_id']);
+
             $this->redirect('admin/dashboard?success=conducteur_valide');
         }
-
         $this->redirect('admin/dashboard');
     }
 
-    /**
-     * Refuse un conducteur
-     */
     public function refuserConducteur($id) {
         if($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $user = $this->userModel->getUserById((int)$id);
             $this->userModel->refuseConducteur((int)$id, (int)$_SESSION['user_id']);
+
+            $activiteModel = $this->model('Activite');
+            $nom = $user ? $user->prenom . ' ' . $user->nom : '#' . $id;
+            $activiteModel->loguer('conducteur_refuse', 'Conducteur ' . $nom . ' refusé.', $_SESSION['user_id']);
+
             $this->redirect('admin/dashboard?success=conducteur_refuse');
         }
-
         $this->redirect('admin/dashboard');
     }
-        /**
-     * Liste des utilisateurs avec recherche
-     */
-    // Dans utilisateurs() - lignes 107-116
+
     public function utilisateurs() {
         $search = trim($_GET['search'] ?? '');
-        $users = !empty($search) ? $this->userModel->search($search) : $this->userModel->findAll();
+        $users  = !empty($search) ? $this->userModel->search($search) : $this->userModel->findAll();
 
-        // Compte les suspendus avec une nouvelle connexion
         $db = new Database();
         $db->query("SELECT COUNT(*) as total FROM utilisateurs WHERE statut = 'suspendu'");
         $row = $db->single();
         $countSuspendus = $row ? (int)$row->total : 0;
 
         $data = [
-            'titre' => 'Gestion des utilisateurs',
-            'users' => $users,
-            'search' => $search,
-            'nb_actifs' => $this->userModel->countByStatut('actif'),
+            'titre'        => 'Gestion des utilisateurs',
+            'users'        => $users,
+            'search'       => $search,
+            'nb_actifs'    => $this->userModel->countByStatut('actif'),
             'nb_suspendus' => $countSuspendus
         ];
         $this->render('admin/utilisateurs', $data);
     }
 
-    /**
-     * Profil détaillé d'un utilisateur
-     */
     public function voirUtilisateur($id) {
         $user = $this->userModel->getUserById((int)$id);
         if(!$user) {
@@ -136,64 +128,64 @@ class AdminController extends Controller {
         $this->render('admin/utilisateur_profil', $data);
     }
 
-    /**
-     * Modifie un utilisateur
-     */
     public function modifierUtilisateur($id) {
         $id = (int)$id;
         if($_SERVER['REQUEST_METHOD'] == 'POST') {
             if($id === (int)$_SESSION['user_id']) {
-                $this->redirect('admin/voirUtilisateur/' . $id . '?error=auto_modification');
+                $this->redirect('admin/utilisateur/' . $id . '?error=auto_modification');
                 return;
             }
             $data = [
-                'nom' => trim($_POST['nom'] ?? ''),
-                'prenom' => trim($_POST['prenom'] ?? ''),
-                'email' => trim($_POST['email'] ?? ''),
+                'nom'       => trim($_POST['nom'] ?? ''),
+                'prenom'    => trim($_POST['prenom'] ?? ''),
+                'email'     => trim($_POST['email'] ?? ''),
                 'telephone' => trim($_POST['telephone'] ?? ''),
-                'role' => trim($_POST['role'] ?? 'passager'),
+                'role'      => trim($_POST['role'] ?? 'passager'),
             ];
             if($this->userModel->updateByAdmin($id, $data)) {
-                $this->redirect('admin/voirUtilisateur/' . $id . '?success=modifie');
+                $this->redirect('admin/utilisateur/' . $id . '?success=modifie');
             } else {
-                $this->redirect('admin/voirUtilisateur/' . $id . '?error=echec');
+                $this->redirect('admin/utilisateur/' . $id . '?error=echec');
             }
         } else {
-            $this->redirect('admin/voirUtilisateur/' . $id);
+            $this->redirect('admin/utilisateur/' . $id);
         }
     }
 
-    /**
-     * Suspend un utilisateur
-     */
     public function suspendreUtilisateur($id) {
         $id = (int)$id;
         if($_SERVER['REQUEST_METHOD'] == 'POST') {
             if($id === (int)$_SESSION['user_id']) {
-                $this->redirect('admin/voirUtilisateur/' . $id . '?error=auto_suspension');
+                $this->redirect('admin/utilisateur/' . $id . '?error=auto_suspension');
                 return;
             }
+            $user = $this->userModel->getUserById($id);
             $this->userModel->suspend($id);
-            $this->redirect('admin/voirUtilisateur/' . $id . '?success=suspendu');
+
+            $activiteModel = $this->model('Activite');
+            $nom = $user ? $user->prenom . ' ' . $user->nom : '#' . $id;
+            $activiteModel->loguer('utilisateur_suspendu', 'Utilisateur ' . $nom . ' suspendu.', $_SESSION['user_id']);
+
+            $this->redirect('admin/utilisateur/' . $id . '?success=suspendu');
         }
-        $this->redirect('admin/voirUtilisateur/' . $id);
+        $this->redirect('admin/utilisateur/' . $id);
     }
 
-    /**
-     * Réactive un utilisateur
-     */
     public function reactiverUtilisateur($id) {
         $id = (int)$id;
         if($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $user = $this->userModel->getUserById($id);
             $this->userModel->unsuspend($id);
-            $this->redirect('admin/voirUtilisateur/' . $id . '?success=reactive');
+
+            $activiteModel = $this->model('Activite');
+            $nom = $user ? $user->prenom . ' ' . $user->nom : '#' . $id;
+            $activiteModel->loguer('utilisateur_reactive', 'Utilisateur ' . $nom . ' réactivé.', $_SESSION['user_id']);
+
+            $this->redirect('admin/utilisateur/' . $id . '?success=reactive');
         }
-        $this->redirect('admin/voirUtilisateur/' . $id);
+        $this->redirect('admin/utilisateur/' . $id);
     }
 
-    /**
-     * Supprime un utilisateur
-     */
     public function supprimerUtilisateur($id) {
         $id = (int)$id;
         if($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -201,13 +193,53 @@ class AdminController extends Controller {
                 $this->redirect('admin/utilisateurs?error=auto_suppression');
                 return;
             }
+            $user = $this->userModel->getUserById($id);
+            $nom  = $user ? $user->prenom . ' ' . $user->nom : '#' . $id;
+
             if($this->userModel->delete($id)) {
+                $activiteModel = $this->model('Activite');
+                $activiteModel->loguer('utilisateur_supprime', 'Utilisateur ' . $nom . ' supprimé.', $_SESSION['user_id']);
                 $this->redirect('admin/utilisateurs?success=supprime');
             } else {
                 $this->redirect('admin/utilisateurs?error=echec_suppression');
             }
         }
         $this->redirect('admin/utilisateurs');
+    }
+
+    public function reservations() {
+        $reservationModel = $this->model('Reservation');
+
+        $filters = [
+            'statut' => $_GET['statut'] ?? '',
+            'search' => trim($_GET['search'] ?? ''),
+        ];
+
+        $reservations = $reservationModel->getAllWithDetails($filters);
+
+        $data = [
+            'titre'         => 'Gestion des réservations',
+            'reservations'  => $reservations,
+            'filters'       => $filters,
+            'nb_total'      => $reservationModel->countAll(),
+            'nb_en_attente' => $reservationModel->countByStatut('en_attente'),
+            'nb_confirmees' => $reservationModel->countByStatut('confirmee'),
+            'nb_annulees'   => $reservationModel->countByStatut('annulee'),
+        ];
+
+        $this->render('admin/reservations', $data);
+    }
+
+    public function historique() {
+        $activiteModel = $this->model('Activite');
+        $activites     = $activiteModel->getLast(100);
+
+        $data = [
+            'titre'     => 'Historique des activités',
+            'activites' => $activites,
+        ];
+
+        $this->render('admin/historique', $data);
     }
 
 }

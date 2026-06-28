@@ -1,5 +1,6 @@
 <?php
 // public/index.php (Front Controller)
+opcache_reset();
 
 session_start();
 
@@ -7,6 +8,7 @@ require_once '../app/config/config.php';
 require_once '../app/core/Database.php';
 require_once '../app/core/Controller.php';
 require_once '../app/core/Router.php';
+require_once '../app/models/Activite.php'; // ← AJOUTE ICI
 
 $router = new Router();
 
@@ -67,13 +69,15 @@ $router->post('/admin/messages/{id}/lu', 'AdminController', 'marquerMessageLu');
 $router->post('/admin/validerConducteur/{id}', 'AdminController', 'validerConducteur');
 $router->post('/admin/refuserConducteur/{id}', 'AdminController', 'refuserConducteur');
 $router->get('/admin/utilisateurs', 'AdminController', 'utilisateurs');
+$router->get('/admin/reservations', 'AdminController', 'reservations');
 $router->get('/admin/utilisateur/{id}', 'AdminController', 'voirUtilisateur');
 $router->get('/admin/voirUtilisateur/{id}', 'AdminController', 'voirUtilisateur');
 $router->post('/admin/utilisateur/{id}/modifier', 'AdminController', 'modifierUtilisateur');
 $router->post('/admin/utilisateur/{id}/suspendre', 'AdminController', 'suspendreUtilisateur');
 $router->post('/admin/utilisateur/{id}/reactiver', 'AdminController', 'reactiverUtilisateur');
 $router->post('/admin/utilisateur/{id}/supprimer', 'AdminController', 'supprimerUtilisateur');
-
+// Avant la ligne ============================================
+$router->get('/admin/historique', 'AdminController', 'historique');
 // ============================================
 $uri = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];
