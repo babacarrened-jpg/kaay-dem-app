@@ -77,6 +77,14 @@ $router->post('/admin/utilisateur/{id}/reactiver', 'AdminController', 'reactiver
 $router->post('/admin/utilisateur/{id}/supprimer', 'AdminController', 'supprimerUtilisateur');
 // Avant la ligne ============================================
 $router->get('/admin/historique', 'AdminController', 'historique');
+$router->get('/admin/evaluations', 'AdminController', 'evaluations');
+$router->post('/admin/avis/{id}/supprimer', 'AdminController', 'supprimerAvis');
+
+// --- Signalements ---
+$router->get('/admin/signalements', 'AdminController', 'signalements');
+$router->get('/admin/signalement/{id}', 'AdminController', 'voirSignalement');
+$router->post('/admin/signalement/{id}/statut', 'AdminController', 'changerStatutSignalement');
+$router->post('/admin/signalement/{id}/supprimer', 'AdminController', 'supprimerSignalement');
 // ============================================
 $uri = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];

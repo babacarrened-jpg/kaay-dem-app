@@ -49,7 +49,7 @@ class AdminController extends Controller {
 
         $this->render('admin/dashboard', $data);
     }
- 
+
     public function trajets() {
         $filters = [
             'statut'        => $_GET['statut'] ?? '',
@@ -71,9 +71,14 @@ class AdminController extends Controller {
         $this->render('admin/trajets', $data);
     }
 
+    // Version mise à jour par le collègue : JOIN sur demandes_conducteur pour récupérer le bon nom
     public function validerConducteur($id) {
         if($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $user = $this->userModel->getUserById((int)$id);
+            $db = new Database();
+            $db->query('SELECT u.prenom, u.nom FROM demandes_conducteur d JOIN utilisateurs u ON d.utilisateur_id = u.id WHERE d.id = :id');
+            $db->bind(':id', (int)$id);
+            $user = $db->single();
+
             $this->userModel->validateConducteur((int)$id, (int)$_SESSION['user_id']);
 
             $activiteModel = $this->model('Activite');
@@ -85,9 +90,14 @@ class AdminController extends Controller {
         $this->redirect('admin/dashboard');
     }
 
+    // Version mise à jour par le collègue : idem
     public function refuserConducteur($id) {
         if($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $user = $this->userModel->getUserById((int)$id);
+            $db = new Database();
+            $db->query('SELECT u.prenom, u.nom FROM demandes_conducteur d JOIN utilisateurs u ON d.utilisateur_id = u.id WHERE d.id = :id');
+            $db->bind(':id', (int)$id);
+            $user = $db->single();
+
             $this->userModel->refuseConducteur((int)$id, (int)$_SESSION['user_id']);
 
             $activiteModel = $this->model('Activite');
@@ -242,4 +252,40 @@ class AdminController extends Controller {
         $this->render('admin/historique', $data);
     }
 
+    public function evaluations() {
+        $avisModel = $this->model('Avis');
+
+        $filtreNote = isset($_GET['note']) && is_numeric($_GET['note'])
+            ? (int)$_GET['note']
+            : null;
+
+        $evaluations = $avisModel->getAllForAdmin($filtreNote);
+        $stats       = $avisModel->getStatsGlobales();
+
+        $data = [
+            'titre'       => 'Gestion des évaluations',
+            'evaluations' => $evaluations,
+            'stats'       => $stats,
+        ];
+
+        $this->render('admin/evaluations', $data);
+    }
+
+    public function supprimerAvis($id) {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/evaluations');
+        }
+
+        $avisModel = $this->model('Avis');
+        $avisModel->deleteById((int)$id);
+
+        $activiteModel = $this->model('Activite');
+        $activiteModel->loguer(
+            'avis_supprime',
+            'Avis #' . $id . ' supprimé par l\'administrateur.',
+            $_SESSION['user_id']
+        );
+
+        $this->redirect('admin/evaluations?success=avis_supprime');
+    }
 }

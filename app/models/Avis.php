@@ -50,4 +50,80 @@ class Avis implements EvaluableInterface {
         $this->db->bind(':destinataire_id', $destinataireId);
         return $this->db->resultSet();
     }
+
+    /**
+     * Récupère tous les avis avec infos auteur + destinataire + trajet
+     * Utilisé par l'admin uniquement.
+     *
+     * @param int|null $filtreNote  si non null, filtre sur cette note exacte
+     */
+    public function getAllForAdmin(?int $filtreNote = null): array {
+        $sql = "SELECT
+                    a.id,
+                    a.note,
+                    a.commentaire,
+                    a.date_creation,
+                    a.trajet_id,
+                    auteur.id       AS auteur_id,
+                    auteur.prenom   AS auteur_prenom,
+                    auteur.nom      AS auteur_nom,
+                    dest.id         AS destinataire_id,
+                    dest.prenom     AS destinataire_prenom,
+                    dest.nom        AS destinataire_nom,
+                    t.ville_depart,
+                    t.ville_arrivee
+                FROM avis a
+                JOIN utilisateurs auteur ON auteur.id = a.auteur_id
+                JOIN utilisateurs dest   ON dest.id   = a.destinataire_id
+                LEFT JOIN trajets t      ON t.id      = a.trajet_id";
+
+        if ($filtreNote !== null) {
+            $sql .= " WHERE a.note = :note";
+        }
+
+        $sql .= " ORDER BY a.date_creation DESC";
+
+        $this->db->query($sql);
+
+        if ($filtreNote !== null) {
+            $this->db->bind(':note', $filtreNote);
+        }
+
+        return $this->db->resultSet();
+    }
+
+    /**
+     * Statistiques globales des avis pour le bloc synthèse admin
+     */
+    public function getStatsGlobales(): object {
+        $this->db->query("
+            SELECT
+                COUNT(*)           AS total,
+                ROUND(AVG(note),1) AS note_moyenne,
+                SUM(note = 5)      AS nb_5,
+                SUM(note = 4)      AS nb_4,
+                SUM(note = 3)      AS nb_3,
+                SUM(note = 2)      AS nb_2,
+                SUM(note = 1)      AS nb_1
+            FROM avis
+        ");
+        return $this->db->single() ?: (object)[
+            'total'        => 0,
+            'note_moyenne' => 0,
+            'nb_5'         => 0,
+            'nb_4'         => 0,
+            'nb_3'         => 0,
+            'nb_2'         => 0,
+            'nb_1'         => 0,
+        ];
+    }
+
+    /**
+     * Supprime un avis par son id
+     */
+    public function deleteById(int $id): bool {
+        $this->db->query('DELETE FROM avis WHERE id = :id');
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
 }
