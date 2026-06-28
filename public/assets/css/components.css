@@ -15,6 +15,45 @@
 .badge-completed { background: var(--bleu-clair); color: var(--bleu); border: 1px solid var(--bleu); }
 .badge-cancelled { background: var(--rouge-clair); color: #C62828; border: 1px solid var(--rouge); }
 
+/* Badges de statut (réservations, trajets...) : utilisés tels quels dans les vues,
+   couleurs en dur car les variables --or-clair/--vert-clair/--rouge-clair ne sont
+   pas définies ailleurs dans le projet. */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-pending {
+    background: #FEF3C7; /* jaune */
+    color: #92400E;
+}
+
+.status-success {
+    background: #DCFCE7; /* vert */
+    color: #166534;
+}
+
+.status-danger {
+    background: #FEE2E2; /* rouge */
+    color: #991B1B;
+}
+
+.status-info {
+    background: #DBEAFE; /* bleu */
+    color: #1E40AF;
+}
+
+.status-secondary {
+    background: #F1F5F9; /* gris */
+    color: #475569;
+}
+
 .card {
     background: var(--blanc);
     border-radius: var(--radius-lg);

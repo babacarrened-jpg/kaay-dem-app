@@ -53,6 +53,7 @@
 
     <!-- CSS custom -->
     <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/style.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/components.css">
 
     <style>
         /* Glass panels */

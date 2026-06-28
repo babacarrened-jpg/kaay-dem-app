@@ -160,6 +160,16 @@ class User implements RepositoryInterface {
         return $this->db->execute();
     }
 
+    /**
+     * Récupère la dernière demande "devenir conducteur" d'un utilisateur
+     * (en_attente / validee / rejetee), ou null s'il n'en a jamais fait.
+     */
+    public function getDemandeConducteur(int $userId) {
+        $this->db->query('SELECT * FROM demandes_conducteur WHERE utilisateur_id = :user_id ORDER BY id DESC LIMIT 1');
+        $this->db->bind(':user_id', $userId);
+        return $this->db->single();
+    }
+
     public function countByRole(string $role): int {
         $this->db->query("SELECT COUNT(*) as total FROM utilisateurs WHERE role = :role");
         $this->db->bind(':role', $role);
