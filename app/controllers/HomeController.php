@@ -1,6 +1,6 @@
 <?php
 // app/controllers/HomeController.php
-opcache_reset();
+
 
 class HomeController extends Controller {
     
