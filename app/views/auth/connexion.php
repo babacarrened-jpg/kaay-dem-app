@@ -40,6 +40,13 @@
             </div>
         <?php endif; ?>
 
+        <?php if(!empty($compte_err)): ?>
+          <div style="background:#FEE2E2; border:1px solid #fecaca; color:#991B1B; padding:16px 20px; border-radius:12px; margin-bottom:20px; display:flex; align-items:center; gap:12px; font-weight:600;">
+          <i data-lucide="ban" width="20" height="20" style="flex-shrink:0;"></i>
+          <?= htmlspecialchars($compte_err) ?>
+          </div>
+        <?php endif; ?>
+
         <form action="<?= BASE_URL ?>auth/connexion" method="POST">
             
             <div class="input-group" style="margin-bottom: 20px;">

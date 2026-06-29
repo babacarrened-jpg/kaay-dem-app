@@ -125,43 +125,67 @@ class AuthController extends Controller {
      * Gère la connexion
      */
     public function login() {
-        if($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $postData = $this->getPostData();
-
-            $data = [
-                'titre' => 'Connexion - Kaay Dem !',
-                'email' => $postData['email'],
-                'mot_de_passe' => $postData['mot_de_passe'],
-                'email_err' => '',
-                'mot_de_passe_err' => ''
-            ];
-
-            if(empty($data['email'])) { $data['email_err'] = 'Veuillez entrer votre email'; }
-            if(empty($data['mot_de_passe'])) { $data['mot_de_passe_err'] = 'Veuillez entrer votre mot de passe'; }
-
-            if($this->userModel->findUserByEmail($data['email'])) {
-                // Utilisateur trouvé
-            } else {
-                $data['email_err'] = 'Aucun utilisateur trouvé avec cet email';
-            }
-
-            if(empty($data['email_err']) && empty($data['mot_de_passe_err'])) {
-                $loggedInUser = $this->userModel->login($data['email'], $data['mot_de_passe']);
-
-                if($loggedInUser) {
-                    $this->createUserSession($loggedInUser);
-                } else {
-                    $data['mot_de_passe_err'] = 'Mot de passe incorrect';
-                    $this->render('auth/connexion', $data);
-                }
-            } else {
-                $this->render('auth/connexion', $data);
-            }
-        } else {
-            $this->redirect('auth/connexion');
-        }
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        $this->redirect('auth/connexion');
+        return;
     }
 
+    $postData = $this->getPostData();
+
+    $data = [
+        'titre'            => 'Connexion - Kaay Dem !',
+        'email'            => $postData['email'] ?? '',
+        'mot_de_passe'     => $postData['mot_de_passe'] ?? '',
+        'email_err'        => '',
+        'mot_de_passe_err' => '',
+        'compte_err'       => ''
+    ];
+
+    // Validation basique
+    if (empty($data['email'])) {
+        $data['email_err'] = 'Veuillez entrer votre email';
+    }
+    if (empty($data['mot_de_passe'])) {
+        $data['mot_de_passe_err'] = 'Veuillez entrer votre mot de passe';
+    }
+
+    if (!empty($data['email_err']) || !empty($data['mot_de_passe_err'])) {
+        $this->render('auth/connexion', $data);
+        return;
+    }
+
+    // Vérifier si l'utilisateur existe
+    $userExist = $this->userModel->findUserByEmail($data['email']);
+
+    if (!$userExist) {
+        $data['email_err'] = 'Aucun compte trouvé avec cet email';
+        $this->render('auth/connexion', $data);
+        return;
+    }
+
+    // ✅ Vérifier si le compte est suspendu
+    if (isset($userExist->statut) && $userExist->statut === 'suspendu') {
+        $data['compte_err'] = '🚫 Votre compte a été suspendu. Contactez l\'administrateur pour plus d\'informations.';
+        $this->render('auth/connexion', $data);
+        return;
+    }
+
+    // Vérifier le mot de passe
+    $loggedInUser = $this->userModel->login($data['email'], $data['mot_de_passe']);
+
+    if ($loggedInUser) {
+        // Vérifier aussi le statut depuis l'objet retourné
+        if (isset($loggedInUser->statut) && $loggedInUser->statut === 'suspendu') {
+            $data['compte_err'] = '🚫 Votre compte a été suspendu. Contactez l\'administrateur pour plus d\'informations.';
+            $this->render('auth/connexion', $data);
+            return;
+        }
+        $this->createUserSession($loggedInUser);
+    } else {
+        $data['mot_de_passe_err'] = 'Mot de passe incorrect';
+        $this->render('auth/connexion', $data);
+    }
+}
     /**
      * Page : Demande de réinitialisation de mot de passe oublié
      */
