@@ -7,7 +7,7 @@ require_once '../app/config/config.php';
 require_once '../app/core/Database.php';
 require_once '../app/core/Controller.php';
 require_once '../app/core/Router.php';
-require_once '../app/models/Activite.php'; // ← AJOUTE ICI
+require_once '../app/models/Activite.php';
 
 $router = new Router();
 
@@ -23,6 +23,10 @@ $router->post('/auth/connexion', 'AuthController', 'login');
 $router->get('/auth/inscription', 'AuthController', 'registerForm');
 $router->post('/auth/inscription', 'AuthController', 'register');
 $router->get('/auth/deconnexion', 'AuthController', 'logout');
+$router->get('/auth/mot-de-passe-oublie', 'AuthController', 'motDePasseOublie');
+$router->post('/auth/mot-de-passe-oublie', 'AuthController', 'motDePasseOublie');
+$router->get('/auth/reinitialiser-mot-de-passe', 'AuthController', 'reinitialiserMotDePasse');
+$router->post('/auth/reinitialiser-mot-de-passe', 'AuthController', 'reinitialiserMotDePasse');
 
 // --- Trajets ---
 $router->get('/trajets/recherche', 'TrajetController', 'searchForm');
@@ -75,16 +79,14 @@ $router->post('/admin/utilisateur/{id}/modifier', 'AdminController', 'modifierUt
 $router->post('/admin/utilisateur/{id}/suspendre', 'AdminController', 'suspendreUtilisateur');
 $router->post('/admin/utilisateur/{id}/reactiver', 'AdminController', 'reactiverUtilisateur');
 $router->post('/admin/utilisateur/{id}/supprimer', 'AdminController', 'supprimerUtilisateur');
-// Avant la ligne ============================================
 $router->get('/admin/historique', 'AdminController', 'historique');
 $router->get('/admin/evaluations', 'AdminController', 'evaluations');
 $router->post('/admin/avis/{id}/supprimer', 'AdminController', 'supprimerAvis');
-
-// --- Signalements ---
 $router->get('/admin/signalements', 'AdminController', 'signalements');
 $router->get('/admin/signalement/{id}', 'AdminController', 'voirSignalement');
 $router->post('/admin/signalement/{id}/statut', 'AdminController', 'changerStatutSignalement');
 $router->post('/admin/signalement/{id}/supprimer', 'AdminController', 'supprimerSignalement');
+
 // ============================================
 $uri = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];
