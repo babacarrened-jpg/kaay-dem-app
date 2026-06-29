@@ -288,4 +288,134 @@ class AdminController extends Controller {
 
         $this->redirect('admin/evaluations?success=avis_supprime');
     }
+
+    // =============================================
+    // MESSAGES DE CONTACT
+    // =============================================
+
+    public function messages() {
+        $contactModel = $this->model('Contact');
+        $messages = $contactModel->getTous();
+
+        $data = [
+            'titre'    => 'Messages de contact',
+            'messages' => $messages,
+        ];
+
+        $this->render('admin/messages_contact', $data);
+    }
+
+    public function marquerMessageLu($id) {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/messages');
+        }
+
+        $contactModel = $this->model('Contact');
+        $contactModel->marquerLu((int)$id);
+
+        $this->redirect('admin/messages');
+    }
+
+    // =============================================
+    // SIGNALEMENTS
+    // =============================================
+
+    /**
+     * Liste des signalements avec filtres
+     */
+    public function signalements() {
+        $signalementModel = $this->model('Signalement');
+
+        $filters = [
+            'statut' => $_GET['statut'] ?? '',
+            'motif'  => trim($_GET['motif'] ?? ''),
+        ];
+
+        $filtreStatut = !empty($filters['statut']) ? $filters['statut'] : null;
+        $filtreMotif  = !empty($filters['motif']) ? $filters['motif'] : null;
+
+        $signalements = $signalementModel->getAllForAdmin($filtreStatut, $filtreMotif);
+        $stats        = $signalementModel->getStatsGlobales();
+
+        $data = [
+            'titre'        => 'Gestion des signalements',
+            'signalements' => $signalements,
+            'stats'        => $stats,
+            'filters'      => $filters,
+        ];
+
+        $this->render('admin/signalements', $data);
+    }
+
+    /**
+     * Détail d'un signalement
+     */
+    public function voirSignalement($id) {
+        $signalementModel = $this->model('Signalement');
+        $signalement = $signalementModel->getById((int)$id);
+
+        if (!$signalement) {
+            $this->redirect('admin/signalements?error=introuvable');
+            return;
+        }
+
+        $data = [
+            'titre'       => 'Signalement #' . $signalement->id,
+            'signalement' => $signalement,
+        ];
+
+        $this->render('admin/signalement_detail', $data);
+    }
+
+    /**
+     * Changer le statut d'un signalement (nouveau → en_cours → traite)
+     */
+    public function changerStatutSignalement($id) {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/signalements');
+            return;
+        }
+
+        $statut = $_POST['statut'] ?? '';
+        $statutsValides = ['nouveau', 'en_cours', 'traite'];
+
+        if (!in_array($statut, $statutsValides, true)) {
+            $this->redirect('admin/signalements?error=statut_invalide');
+            return;
+        }
+
+        $signalementModel = $this->model('Signalement');
+        $signalementModel->updateStatut((int)$id, $statut);
+
+        $activiteModel = $this->model('Activite');
+        $activiteModel->loguer(
+            'signalement_statut',
+            'Signalement #' . $id . ' passé en "' . $statut . '".',
+            $_SESSION['user_id']
+        );
+
+        $this->redirect('admin/signalements?success=statut_modifie');
+    }
+
+    /**
+     * Supprimer un signalement
+     */
+    public function supprimerSignalement($id) {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/signalements');
+            return;
+        }
+
+        $signalementModel = $this->model('Signalement');
+        $signalementModel->deleteById((int)$id);
+
+        $activiteModel = $this->model('Activite');
+        $activiteModel->loguer(
+            'signalement_supprime',
+            'Signalement #' . $id . ' supprimé par l\'administrateur.',
+            $_SESSION['user_id']
+        );
+
+        $this->redirect('admin/signalements?success=signalement_supprime');
+    }
 }
