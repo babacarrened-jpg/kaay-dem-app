@@ -27,6 +27,9 @@ $router->get('/auth/mot-de-passe-oublie', 'AuthController', 'motDePasseOublie');
 $router->post('/auth/mot-de-passe-oublie', 'AuthController', 'motDePasseOublie');
 $router->get('/auth/reinitialiser-mot-de-passe', 'AuthController', 'reinitialiserMotDePasse');
 $router->post('/auth/reinitialiser-mot-de-passe', 'AuthController', 'reinitialiserMotDePasse');
+$router->get('/auth/admin-connexion', 'AuthController', 'adminLoginForm');
+$router->post('/auth/admin-connexion', 'AuthController', 'adminLogin');
+
 
 // --- Trajets ---
 $router->get('/trajets/recherche', 'TrajetController', 'searchForm');

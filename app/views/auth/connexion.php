@@ -78,6 +78,13 @@
                 Pas encore de compte ? 
                 <a href="<?= BASE_URL ?>auth/inscription" style="font-weight: 700; color: #dc2626; text-decoration:none; margin-left:4px;">Créer un compte</a>
             </div>
+            <div style="text-align: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+                <a href="<?= BASE_URL ?>auth/admin-connexion" style="font-size: 13px; font-weight: 600; color: #6b7280; text-decoration:none;">
+                    <i data-lucide="shield" width="14" height="14" style="display:inline-block; vertical-align:middle; margin-right:4px;"></i>
+                    Accès Administrateur
+                </a>
+            </div>
+
         </form>
     </div>
 </div>
