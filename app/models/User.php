@@ -34,10 +34,9 @@ class User implements RepositoryInterface {
     public function findUserByEmail($email) {
         $this->db->query('SELECT * FROM utilisateurs WHERE email = :email');
         $this->db->bind(':email', $email);
-        $this->db->single();
-        return $this->db->rowCount() > 0;
+        $row = $this->db->single();
+        return $row ?: false;
     }
-
     public function getUserById($id) {
         $this->db->query('SELECT * FROM utilisateurs WHERE id = :id');
         $this->db->bind(':id', $id);
