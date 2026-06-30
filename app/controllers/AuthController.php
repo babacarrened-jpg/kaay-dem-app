@@ -1,6 +1,8 @@
 <?php
 // app/controllers/AuthController.php
 
+require_once __DIR__ . '/../models/entities/UtilisateurFactory.php';
+
 class AuthController extends Controller {
     private $userModel;
 
@@ -275,7 +277,12 @@ class AuthController extends Controller {
     }
 
     /**
-     * Crée la session utilisateur
+     * Crée la session utilisateur.
+     *
+     * Utilise UtilisateurFactory pour instancier la sous-classe correspondant
+     * au rôle de l'utilisateur (Conducteur, Passager ou Admin), et s'appuie
+     * sur le polymorphisme de cette hiérarchie pour déterminer le libellé
+     * et la route du tableau de bord, plutôt que de tester le rôle "à la main".
      */
     public function createUserSession($user) {
         $_SESSION['user_id'] = $user->id;
@@ -297,13 +304,18 @@ class AuthController extends Controller {
 
         $_SESSION['user_roles'] = array_values(array_unique($roles));
 
-        if($user->role == 'admin') {
-            $this->redirect('admin/dashboard');
-        } elseif($user->role == 'conducteur' || $user->est_conducteur_valide) {
-            $this->redirect('conducteur/dashboard');
-        } else {
-            $this->redirect('passager/dashboard');
+        // Instanciation polymorphe : entiteUtilisateur est un Conducteur, un
+        // Passager ou un Admin selon le rôle effectif de connexion, mais le
+        // code ci-dessous ne fait plus aucune distinction explicite entre
+        // ces cas (même règle de priorité qu'avant : conducteur validé > rôle déclaré).
+        $roleEffectif = $user->role;
+        if ($user->role !== 'admin' && (!empty($user->est_conducteur_valide) || $user->role === 'conducteur')) {
+            $roleEffectif = 'conducteur';
         }
+        $entiteUtilisateur = UtilisateurFactory::creerSelonRole($user, $roleEffectif);
+        $_SESSION['user_libelle_dashboard'] = $entiteUtilisateur->getLibelleTableauDeBord();
+
+        $this->redirect($entiteUtilisateur->getRouteTableauDeBord());
     }
 
     /**
