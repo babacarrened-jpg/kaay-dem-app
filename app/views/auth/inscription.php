@@ -1,9 +1,33 @@
-<div style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<div style="
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    box-sizing: border-box;
+    background-color: #f7f9fa;
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCAxNDAgODAiPjx0ZXh0IHg9IjE1IiB5PSIzMCIgZmlsbD0iI2RjMjYyNiIgb3BhY2l0eT0iMC4wNyIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtd2VpZ2h0PSI5MDAiIGZvbnQtc2l6ZT0iMTIiIGxldHRlci1zcGFjaW5nPSIwLjVweSI+S0FBWTwvdGV4dD48dGV4dCB4PSIxNSIgeT0iNDUiIGZpbGw9IiNkYzI2MjYiIG9wYWNpdHk9IjAuMDciIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXdlaWdodD0iOTAwIiBmb250LXNpemU9IjEyIiBsZXR0ZXItc3BhY2luZz0iMC41cHkiPkRFTU88L3RleHQ+PHRleHQgeD0iODUiIHk9IjcwIiBmaWxsPSIjZGMyNjI2IiBvcGFjaXR5PSIwLjA3IiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9IjkwMCIgZm9udC1zaXplPSIxMiIgbGV0dGVyLXNwYWNpbmc9IjAuNXB5Ij5LQUFZPC90ZXh0Pjx0ZXh0IHg9Ijg1IiB5PSI4NSIgZmlsbD0iI2RjMjYyNiIgb3BhY2l0eT0iMC4wNyIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtd2VpZ2h0PSI5MDAiIGZvbnQtc2l6ZT0iMTIiIGxldHRlci1zcGFjaW5nPSIwLjVweSI+REVNTTwvdGV4dD48L3N2Zz4=');
+    background-repeat: repeat;
+    font-family: system-ui, -apple-system, sans-serif;
+">
     
-    <div class="glass-panel auth-card" style="width: 100%; max-width: 600px; padding: 48px;">
+    <div class="glass-panel auth-card" style="
+        width: 100%;
+        max-width: 600px;
+        padding: 48px;
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid rgba(229, 231, 235, 0.6);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        box-sizing: border-box;
+    ">
         
         <div style="text-align: center; margin-bottom: 32px;">
-            <div style="width: 64px; height: 64px; background: var(--kd-primary-light); color: var(--kd-primary); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; transform: rotate(-5deg);">
+            <div style="width: 64px; height: 64px; background: rgba(220, 38, 38, 0.08); color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.15); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; transform: rotate(-5deg);">
                 <i data-lucide="user-plus" width="32" height="32"></i>
             </div>
             <h1 style="font-size: 28px; margin-bottom: 8px;">Rejoignez l'aventure</h1>
@@ -68,8 +92,8 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%; height: 52px; font-size: 16px;">
-                Créer mon compte <i data-lucide="user-check"></i>
+            <button type="submit" class="btn btn-primary" style="width: 100%; height: 52px; font-size: 16px; font-weight: 700; background: #dc2626; color:white; border:0; border-radius:14px; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; box-shadow: 0 6px 20px rgba(220,38,38,0.2); transition: background 0.2s;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
+                Créer mon compte <i data-lucide="user-check" width="16" height="16"></i>
             </button>
 
             <div style="text-align: center; margin-top: 32px; font-size: 14px; color:var(--text-muted);">
@@ -79,3 +103,7 @@
         </form>
     </div>
 </div>
+
+<script>
+  lucide.createIcons();
+</script>
